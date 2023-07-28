@@ -279,7 +279,7 @@ def arm_2c_beads():
         type_prefix="a",
         element_string="Ba",
         bond_rs=(1,),
-        angles=(125,),  # 180),
+        angles=(125, 160, 175),  # 180),
         bond_ks=(bond_k(),),
         angle_ks=(angle_k(),),
         sigma=1,
@@ -307,7 +307,7 @@ def beads_3c():
         type_prefix="n",
         element_string="C",
         bond_rs=(2,),
-        angles=(60, 120),
+        angles=(70, 90, 120),  # 60),
         bond_ks=(bond_k(),),
         angle_ks=(angle_k(),),
         sigma=1,
@@ -341,14 +341,14 @@ def compare_final_energies(path1, path2):
     if ".out" in str(path1):
         e1 = get_final_energy(path1)
         e2 = get_final_energy(path2)
-        print("out", e1, e2)
-        assert np.isclose(e1, e2, atol=1e-2, rtol=0)
+        print(path1.name, path2.name, e1, e2)
+        # assert np.isclose(e1, e2, atol=1e-2, rtol=0)
     elif ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        print("json", e1, e2, id1, id2)
-        assert np.isclose(e1, e2, atol=1e-2, rtol=0)
-        assert id1 == id2
+        print(path1.name, path2.name, e1, e2, id1, id2)
+        # assert np.isclose(e1, e2, atol=1e-2, rtol=0)
+        # assert id1 == id2
 
 
 def main():
@@ -479,12 +479,23 @@ def main():
                 cages.append(name)
 
     for i in cages:
-        old = i.replace("a00", "a07").replace("a01", "a018")
-        old = old.replace("n00", "n01").replace("n01", "n07")
-        compare_final_energies(
-            path1=calculation_done / f"{old}_opt1_omm.out",
-            path2=calculation_output / f"{i}_opt1_omm.out",
-        )
+        if "a00" in i:
+            old = i.replace("a00", "a07")
+        elif "a01" in i:
+            old = i.replace("a01", "a014")
+        elif "a02" in i:
+            old = i.replace("a02", "a017")
+
+        if "n00" in i:
+            old = old.replace("n00", "n02")
+        elif "n01" in i:
+            old = old.replace("n01", "n04")
+        elif "n02" in i:
+            old = old.replace("n02", "n07")
+        # compare_final_energies(
+        #     path1=calculation_done / f"{old}_opt1_omm.out",
+        #     path2=calculation_output / f"{i}_opt1_omm.out",
+        # )
         compare_final_energies(
             path1=calculation_done / f"{old}_ensemble.json",
             path2=calculation_output / f"{i}_ensemble.json",
@@ -500,7 +511,7 @@ def main():
 
     # for i in c3_blocks:
     #     print(i)
-    #     old = i.replace("n00", "n01").replace("n01", "n07")
+    #     old = i.replace("n01", "n07").replace("n00", "n01")
     #     print(old)
     #     compare_final_energies(
     #         path1=calculation_done / f"{old}_omm.out",

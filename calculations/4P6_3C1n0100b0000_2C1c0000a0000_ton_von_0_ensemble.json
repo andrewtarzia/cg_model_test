@@ -1,0 +1,1568 @@
+{
+    "0": {
+        "CustomNonbondedForce": [
+            0.0001295803376706317,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            4.4522776079247706e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            5.478029197547585e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.4901161193847656e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00020371406844787998,
+            "kJ/mol"
+        ],
+        "source": "opt1"
+    },
+    "1": {
+        "CustomNonbondedForce": [
+            0.00012963129847776145,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            3.2699983876227634e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            3.139900945825502e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.4901161193847656e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0001792014675174869,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "2": {
+        "CustomNonbondedForce": [
+            0.00012960376625414938,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            3.623978727773647e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            2.4551321985200047e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.4901161193847656e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00017268022816097073,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "3": {
+        "CustomNonbondedForce": [
+            0.00012961684842593968,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.2854993656219449e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            2.648735244292766e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.7881393432617188e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00017527109366710647,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "4": {
+        "CustomNonbondedForce": [
+            0.00012961072206962854,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            7.106992597982753e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            6.14388263784349e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.1920928955078125e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0002100774700011243,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "5": {
+        "CustomNonbondedForce": [
+            0.00012964877532795072,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            5.405825959314825e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00017015522462315857,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.7881393432617188e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0003230912193430413,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "6": {
+        "CustomNonbondedForce": [
+            0.00012963969493284822,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            8.833070751279593e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.000741106690838933,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            8.046627044677734e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0009600457269698381,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "7": {
+        "CustomNonbondedForce": [
+            0.00012960698222741485,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            4.0931372495833784e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            5.0018541514873505e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.7881393432617188e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00020160005442448892,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "8": {
+        "CustomNonbondedForce": [
+            0.00012964906636625528,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            3.4639706427697092e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            6.0014066548319533e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.7881393432617188e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0002110084969899617,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "9": {
+        "CustomNonbondedForce": [
+            0.00012962467735633254,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            8.461595825792756e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            5.78266590309795e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            2.682209014892578e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00022273502236203058,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "10": {
+        "CustomNonbondedForce": [
+            0.0001296177360927686,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            2.0628001493605552e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            3.0126655474305153e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.4901161193847656e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00017670835291028197,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "11": {
+        "CustomNonbondedForce": [
+            0.00012961235188413411,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            2.752750788204139e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            2.021520231210161e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.4901161193847656e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00016748146617828752,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "12": {
+        "CustomNonbondedForce": [
+            0.00012962662731297314,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.6792606402304955e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0004752296954393387,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            5.6624412536621094e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0006782733416912379,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "13": {
+        "CustomNonbondedForce": [
+            0.00012956708087585866,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.036336561810458e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0005563147133216262,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            2.086162567138672e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0007171067854869762,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "14": {
+        "CustomNonbondedForce": [
+            0.00012963345216121525,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            4.0299373722518794e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            4.8089725169120356e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.1920928955078125e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0001936740436576656,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "15": {
+        "CustomNonbondedForce": [
+            0.00012958204024471343,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            6.114844836702105e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            5.397652421379462e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.1920928955078125e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00020159433825028827,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "16": {
+        "CustomNonbondedForce": [
+            0.0001296079281019047,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            5.6670751291676424e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0004851713019888848,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            5.9604644775390625e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0006800509499953478,
+            "kJ/mol"
+        ],
+        "source": "shifted"
+    },
+    "17": {
+        "CustomNonbondedForce": [
+            0.23087440431118011,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2767696678638458,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.435291290283203,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.1913607120513916,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.13429607450962,
+            "kJ/mol"
+        ],
+        "source": "nearby_opt"
+    },
+    "18": {
+        "CustomNonbondedForce": [
+            0.00012961382162757218,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            4.045752575621009e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0001983527617994696,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            3.8743019104003906e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0003707553551066667,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "19": {
+        "CustomNonbondedForce": [
+            0.00012960149615537375,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            2.5616729999455856e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            9.852819493971765e-05,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            2.682209014892578e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00025751345424396277,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "20": {
+        "CustomNonbondedForce": [
+            0.00012961705215275288,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.9034097931580618e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0004824320203624666,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            5.066394805908203e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0006817471185058821,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "21": {
+        "CustomNonbondedForce": [
+            0.00012963679910171777,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.2924610928166658e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00046867021592333913,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            9.834766387939453e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0007095792898326181,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "22": {
+        "CustomNonbondedForce": [
+            0.22259777784347534,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27353009581565857,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44753074645996,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19019544124603271,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133854061365128,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "23": {
+        "CustomNonbondedForce": [
+            0.22258597612380981,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2736588716506958,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.438018798828125,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.199773907661438,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.13403755426407,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "24": {
+        "CustomNonbondedForce": [
+            0.00012962939217686653,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            3.1909537938190624e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.001339463866315782,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.00013113021850585938,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0016321330149366986,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "25": {
+        "CustomNonbondedForce": [
+            0.00012966449139639735,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.6170930393855087e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0003544588980730623,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            1.7881393432617188e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0005181757132959319,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "26": {
+        "CustomNonbondedForce": [
+            0.2209029644727707,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27381467819213867,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.442047119140625,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19678175449371338,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133546516299248,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "27": {
+        "CustomNonbondedForce": [
+            0.00012959619925823063,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            8.66545997268986e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00046875420957803726,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.00011324882507324219,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0007202646938821999,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "28": {
+        "CustomNonbondedForce": [
+            0.22932343184947968,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27494800090789795,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.441682815551758,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.1888960599899292,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134850308299065,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "29": {
+        "CustomNonbondedForce": [
+            0.00012965919449925423,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            7.0344585765269585e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0010528337443247437,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.00016391277313232422,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0013534401705328492,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "30": {
+        "CustomNonbondedForce": [
+            0.00012960912135895342,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.1667601029330399e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0003121245536021888,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            6.258487701416016e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0005159861530046328,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "31": {
+        "CustomNonbondedForce": [
+            0.22242672741413116,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27283143997192383,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.448028564453125,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19091665744781494,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134203389286995,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "32": {
+        "CustomNonbondedForce": [
+            0.0001295593974646181,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            7.293130329344422e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.002385774627327919,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.0002950429916381836,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.002883308319724165,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "33": {
+        "CustomNonbondedForce": [
+            0.00012963674089405686,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.083211009245133e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0004961453378200531,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            8.940696716308594e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0007260211559696472,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "34": {
+        "CustomNonbondedForce": [
+            0.00012959855666849762,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.4418883438338526e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00019361035083420575,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            3.8743019104003906e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0003763708100450458,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "35": {
+        "CustomNonbondedForce": [
+            0.00012963313201908022,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            7.973915671755094e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00014131471107248217,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            3.8743019104003906e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0003176647778673214,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "36": {
+        "CustomNonbondedForce": [
+            0.21032269299030304,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2461070716381073,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.55591583251953,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.08772015571594238,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.100065752863884,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "37": {
+        "CustomNonbondedForce": [
+            0.00012963243352714926,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            9.79100695985835e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00025194979389198124,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            2.682209014892578e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.00041819532452791464,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "38": {
+        "CustomNonbondedForce": [
+            0.2220526933670044,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27415546774864197,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44306755065918,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19429922103881836,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133574932813644,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "39": {
+        "CustomNonbondedForce": [
+            0.22571997344493866,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2759346067905426,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.440353393554688,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19168853759765625,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133696511387825,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "40": {
+        "CustomNonbondedForce": [
+            0.22563639283180237,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2721221446990967,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44585418701172,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.190088152885437,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133700877428055,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "41": {
+        "CustomNonbondedForce": [
+            0.22111918032169342,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2752286195755005,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44122314453125,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19678175449371338,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134352698922157,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "42": {
+        "CustomNonbondedForce": [
+            0.22721382975578308,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27471107244491577,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44078254699707,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19115805625915527,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133865505456924,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "43": {
+        "CustomNonbondedForce": [
+            0.224029079079628,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2757135033607483,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.440845489501953,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19295215606689453,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133540228009224,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "44": {
+        "CustomNonbondedForce": [
+            0.22243495285511017,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27374356985092163,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.44333267211914,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19467175006866455,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134182944893837,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "45": {
+        "CustomNonbondedForce": [
+            0.22470581531524658,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27456381916999817,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.443727493286133,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19181370735168457,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134810835123062,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "46": {
+        "CustomNonbondedForce": [
+            0.00012956712453160435,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            2.2646725483355112e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0005406977725215256,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.0001430511474609375,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0008359627699974226,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "47": {
+        "CustomNonbondedForce": [
+            0.22693823277950287,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2721366286277771,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.445276260375977,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.1894831657409668,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133834287524223,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "48": {
+        "CustomNonbondedForce": [
+            0.2082861214876175,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2466387003660202,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.556888580322266,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.08643269538879395,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.098246097564697,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "49": {
+        "CustomNonbondedForce": [
+            0.21851833164691925,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27387532591819763,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.446056365966797,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19540488719940186,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133854910731316,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "50": {
+        "CustomNonbondedForce": [
+            0.22836820781230927,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27451419830322266,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.442941665649414,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.18849968910217285,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.13432376086712,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "51": {
+        "CustomNonbondedForce": [
+            0.22200815379619598,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27829670906066895,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.444808959960938,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19089579582214355,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.136009618639946,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "52": {
+        "CustomNonbondedForce": [
+            0.2259407788515091,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.27443546056747437,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.441192626953125,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19193291664123535,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.133501783013344,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "53": {
+        "CustomNonbondedForce": [
+            0.2246524840593338,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2745189070701599,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.443584442138672,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19208788871765137,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134843721985817,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "54": {
+        "CustomNonbondedForce": [
+            0.2253870964050293,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            0.2763887047767639,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            18.439876556396484,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            0.19331574440002441,
+            "kJ/mol"
+        ],
+        "total energy": [
+            19.134968101978302,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "55": {
+        "CustomNonbondedForce": [
+            0.0001295782276429236,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            6.331113127089338e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.00015202167560346425,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            3.2782554626464844e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.000320713570999942,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "56": {
+        "CustomNonbondedForce": [
+            0.00012960202002432197,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            6.913492143212352e-06,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0003179429331794381,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            5.066394805908203e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0005051223934060545,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    },
+    "57": {
+        "CustomNonbondedForce": [
+            0.0001295891561312601,
+            "kJ/mol"
+        ],
+        "CMMotionRemover": [
+            0.0,
+            "kJ/mol"
+        ],
+        "HarmonicBondForce": [
+            1.6403522749897093e-05,
+            "kJ/mol"
+        ],
+        "HarmonicAngleForce": [
+            0.0003366021264810115,
+            "kJ/mol"
+        ],
+        "PeriodicTorsionForce": [
+            3.5762786865234375e-05,
+            "kJ/mol"
+        ],
+        "total energy": [
+            0.0005183575922274031,
+            "kJ/mol"
+        ],
+        "source": "smd"
+    }
+}

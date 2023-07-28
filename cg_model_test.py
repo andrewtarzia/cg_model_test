@@ -279,7 +279,7 @@ def arm_2c_beads():
         type_prefix="a",
         element_string="Ba",
         bond_rs=(1,),
-        angles=(125, 180),
+        angles=(125,),  # 180),
         bond_ks=(bond_k(),),
         angle_ks=(angle_k(),),
         sigma=1,
@@ -341,13 +341,12 @@ def compare_final_energies(path1, path2):
     if ".out" in str(path1):
         e1 = get_final_energy(path1)
         e2 = get_final_energy(path2)
-        print(e1, e2)
+        print("out", e1, e2)
         assert np.isclose(e1, e2, atol=1e-2, rtol=0)
     elif ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        print(e1, e2)
-        print(id1, id2)
+        print("json", e1, e2, id1, id2)
         assert np.isclose(e1, e2, atol=1e-2, rtol=0)
         assert id1 == id2
 
@@ -406,7 +405,7 @@ def main():
     )
 
     # Define list of topology functions.
-    cage_3p2_topologies = {"4P62": stk.cage.FourPlusSix2}
+    cage_3p2_topologies = {"4P6": stk.cage.FourPlusSix}
 
     populations = {
         "2p3": {
@@ -480,11 +479,8 @@ def main():
                 cages.append(name)
 
     for i in cages:
-        print(i)
         old = i.replace("a00", "a07").replace("a01", "a018")
         old = old.replace("n00", "n01").replace("n01", "n07")
-        print(old)
-        raise SystemExit()
         compare_final_energies(
             path1=calculation_done / f"{old}_opt1_omm.out",
             path2=calculation_output / f"{i}_opt1_omm.out",

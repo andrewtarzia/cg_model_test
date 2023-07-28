@@ -1,0 +1,94 @@
+<ForceField>
+
+ <AtomTypes>
+  <Type name="n0100" class="n0100" element="C" mass="10"/>
+  <Type name="b0000" class="b0000" element="Pb" mass="10"/>
+  <Type name="a0000" class="a0000" element="Ba" mass="10"/>
+  <Type name="c0000" class="c0000" element="Ag" mass="10"/>
+ </AtomTypes>
+
+ <Residues>
+  <Residue name="ALL">
+   <Atom name="0" type="n0100"/>
+   <Atom name="1" type="b0000"/>
+   <Atom name="2" type="b0000"/>
+   <Atom name="3" type="b0000"/>
+   <Atom name="4" type="n0100"/>
+   <Atom name="5" type="b0000"/>
+   <Atom name="6" type="b0000"/>
+   <Atom name="7" type="b0000"/>
+   <Atom name="8" type="n0100"/>
+   <Atom name="9" type="b0000"/>
+   <Atom name="10" type="b0000"/>
+   <Atom name="11" type="b0000"/>
+   <Atom name="12" type="n0100"/>
+   <Atom name="13" type="b0000"/>
+   <Atom name="14" type="b0000"/>
+   <Atom name="15" type="b0000"/>
+   <Atom name="16" type="a0000"/>
+   <Atom name="17" type="a0000"/>
+   <Atom name="18" type="c0000"/>
+   <Atom name="19" type="a0000"/>
+   <Atom name="20" type="a0000"/>
+   <Atom name="21" type="c0000"/>
+   <Atom name="22" type="a0000"/>
+   <Atom name="23" type="a0000"/>
+   <Atom name="24" type="c0000"/>
+   <Atom name="25" type="a0000"/>
+   <Atom name="26" type="a0000"/>
+   <Atom name="27" type="c0000"/>
+   <Atom name="28" type="a0000"/>
+   <Atom name="29" type="a0000"/>
+   <Atom name="30" type="c0000"/>
+   <Atom name="31" type="a0000"/>
+   <Atom name="32" type="a0000"/>
+   <Atom name="33" type="c0000"/>
+   <Bond atomName1="0" atomName2="1"/>
+   <Bond atomName1="0" atomName2="2"/>
+   <Bond atomName1="0" atomName2="3"/>
+   <Bond atomName1="4" atomName2="5"/>
+   <Bond atomName1="4" atomName2="6"/>
+   <Bond atomName1="4" atomName2="7"/>
+   <Bond atomName1="8" atomName2="9"/>
+   <Bond atomName1="8" atomName2="10"/>
+   <Bond atomName1="8" atomName2="11"/>
+   <Bond atomName1="12" atomName2="13"/>
+   <Bond atomName1="12" atomName2="14"/>
+   <Bond atomName1="12" atomName2="15"/>
+   <Bond atomName1="16" atomName2="18"/>
+   <Bond atomName1="17" atomName2="18"/>
+   <Bond atomName1="19" atomName2="21"/>
+   <Bond atomName1="20" atomName2="21"/>
+   <Bond atomName1="22" atomName2="24"/>
+   <Bond atomName1="23" atomName2="24"/>
+   <Bond atomName1="25" atomName2="27"/>
+   <Bond atomName1="26" atomName2="27"/>
+   <Bond atomName1="28" atomName2="30"/>
+   <Bond atomName1="29" atomName2="30"/>
+   <Bond atomName1="31" atomName2="33"/>
+   <Bond atomName1="32" atomName2="33"/>
+   <Bond atomName1="1" atomName2="16"/>
+   <Bond atomName1="5" atomName2="17"/>
+   <Bond atomName1="2" atomName2="19"/>
+   <Bond atomName1="9" atomName2="20"/>
+   <Bond atomName1="3" atomName2="22"/>
+   <Bond atomName1="13" atomName2="23"/>
+   <Bond atomName1="7" atomName2="25"/>
+   <Bond atomName1="10" atomName2="26"/>
+   <Bond atomName1="6" atomName2="28"/>
+   <Bond atomName1="15" atomName2="29"/>
+   <Bond atomName1="11" atomName2="31"/>
+   <Bond atomName1="14" atomName2="32"/>
+  </Residue>
+ </Residues>
+
+ <CustomNonbondedForce energy="sqrt(epsilon1*epsilon2)*((sigma1+sigma2)/(2*r))^12" bondCutoff="2">
+  <PerParticleParameter name="sigma"/>
+  <PerParticleParameter name="epsilon"/>
+  <Atom type="n0100" sigma="0.1" epsilon="10.0"/>
+  <Atom type="b0000" sigma="0.1" epsilon="10.0"/>
+  <Atom type="a0000" sigma="0.1" epsilon="10.0"/>
+  <Atom type="c0000" sigma="0.1" epsilon="10.0"/>
+ </CustomNonbondedForce>
+
+</ForceField>

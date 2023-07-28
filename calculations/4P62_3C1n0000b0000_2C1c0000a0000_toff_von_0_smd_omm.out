@@ -1,0 +1,39 @@
+start time: 1690561728.4557369
+atoms: 34
+energy decomposition:
+CustomNonbondedForce: 0.030598200857639313 kJ/mol
+CMMotionRemover: 0.0 kJ/mol
+HarmonicBondForce: 0.0 kJ/mol
+HarmonicAngleForce: 0.0 kJ/mol
+total energy: 0.030598200857639313 kJ/mol
+
+minimizing energy
+
+energy decomposition:
+CustomNonbondedForce: 0.030193183571100235 kJ/mol
+CMMotionRemover: 0.0 kJ/mol
+HarmonicBondForce: 0.0 kJ/mol
+HarmonicAngleForce: 0.0 kJ/mol
+total energy: 0.030193183571100235 kJ/mol
+
+simulation parameters:
+initalise velocities at T=300 K
+steps: 20000
+time step: 0.5 fs
+total time: 0.01 ns
+report frequency: 500
+trajectory frequency per step: 500
+trajectory frequency per ns: 250.0 fs
+seed: 1000
+running simulation
+done in 1.4926223754882812 s (13399.24 steps/s)
+
+energy decomposition:
+CustomNonbondedForce: 110.86949157714844 kJ/mol
+CMMotionRemover: 0.0 kJ/mol
+HarmonicBondForce: 0.0 kJ/mol
+HarmonicAngleForce: 0.0 kJ/mol
+total energy: 110.86949157714844 kJ/mol
+
+end time: 1690561730.0739987
+total time: 1.6182618141174316 [s]

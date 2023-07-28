@@ -1,0 +1,20 @@
+start time: 1688413605.1163077
+atoms: 34
+energy decomposition:
+CustomNonbondedForce: 0.020120439528600945 kJ/mol
+CMMotionRemover: 0.0 kJ/mol
+HarmonicBondForce: 7.8080217227919935 kJ/mol
+HarmonicAngleForce: 198.28230925731796 kJ/mol
+total energy: 206.11045141963857 kJ/mol
+
+minimizing energy
+
+energy decomposition:
+CustomNonbondedForce: 0.027588040142164413 kJ/mol
+CMMotionRemover: 0.0 kJ/mol
+HarmonicBondForce: 0.0018830287316258442 kJ/mol
+HarmonicAngleForce: 0.4208262437160992 kJ/mol
+total energy: 0.4502973125898895 kJ/mol
+
+end time: 1688413605.2997346
+total time: 0.1834268569946289 [s]

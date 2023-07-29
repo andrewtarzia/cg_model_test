@@ -359,22 +359,22 @@ def compare_final_energies(path1, path2):
 
 
 def main():
-    first_line = f"Usage: {__file__}.py"
-    if not len(sys.argv) == 1:
+    first_line = f"Usage: {__file__}.py path "
+    if not len(sys.argv) == 2:
         logging.info(f"{first_line}")
         sys.exit()
     else:
-        pass
+        path = sys.argv[1]
 
-    struct_output = pathlib.Path().absolute() / "structures"
+    struct_output = pathlib.Path().absolute() / path / "structures"
     check_directory(struct_output)
-    calculation_output = pathlib.Path().absolute() / "calculations"
+    calculation_output = pathlib.Path().absolute() / path / "calculations"
     check_directory(calculation_output)
-    ligand_output = pathlib.Path().absolute() / "ligands"
+    ligand_output = pathlib.Path().absolute() / path / "ligands"
     check_directory(ligand_output)
 
-    struct_done = pathlib.Path().absolute() / "structures_done"
-    calculation_done = pathlib.Path().absolute() / "calculations_done"
+    struct_done = pathlib.Path().absolute() / path / "structures_done"
+    calculation_done = pathlib.Path().absolute() / path / "calculations_done"
 
     # Define bead libraries.
     beads_core_2c_lib = core_2c_beads()

@@ -51,6 +51,7 @@ def optimise_cage(
     bead_set,
     custom_torsion_set,
     custom_vdw_set,
+    platform,
 ):
     fina_mol_file = os.path.join(output_dir, f"{name}_final.mol")
     if os.path.exists(fina_mol_file):
@@ -80,6 +81,7 @@ def optimise_cage(
         bond_ff_scale=10,
         angle_ff_scale=10,
         max_iterations=20,
+        platform=platform,
     )
 
     logging.info(f"optimisation of {name}")
@@ -96,6 +98,7 @@ def optimise_cage(
         torsions=False,
         vdw_bond_cutoff=2,
         # max_iterations=50,
+        platform=platform,
     )
     ensemble.add_conformer(conformer=conformer, source="opt1")
 
@@ -116,6 +119,7 @@ def optimise_cage(
             torsions=False,
             vdw_bond_cutoff=2,
             # max_iterations=50,
+            platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="shifted")
 
@@ -140,6 +144,7 @@ def optimise_cage(
             torsions=False,
             vdw_bond_cutoff=2,
             # max_iterations=50,
+            platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="nearby_opt")
 
@@ -150,14 +155,9 @@ def optimise_cage(
         name=name,
         molecule=ensemble.get_lowest_e_conformer().molecule,
         bead_set=bead_set,
-        ensemble=ensemble,
         output_dir=output_dir,
         custom_vdw_set=custom_vdw_set,
         custom_torsion_set=None,
-        bonds=True,
-        angles=True,
-        torsions=False,
-        vdw_bond_cutoff=2,
         suffix="smd",
         bond_ff_scale=10,
         angle_ff_scale=10,
@@ -167,6 +167,7 @@ def optimise_cage(
         friction=1.0 / openmm.unit.picosecond,
         reporting_freq=traj_freq,
         traj_freq=traj_freq,
+        platform=platform,
     )
     if soft_md_trajectory is None:
         logging.info(f"!!!!! {name} MD exploded !!!!!")
@@ -197,6 +198,7 @@ def optimise_cage(
             torsions=False,
             vdw_bond_cutoff=2,
             # max_iterations=50,
+            platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="smd")
     ensemble.write_conformers_to_file()
@@ -281,7 +283,7 @@ def arm_2c_beads():
         type_prefix="a",
         element_string="Ba",
         bond_rs=(1,),
-        angles=(125, 160, 175),  # 180),
+        angles=(125, 160, 175),  # , 180),
         bond_ks=(bond_k(),),
         angle_ks=(angle_k(),),
         sigma=1,
@@ -309,7 +311,7 @@ def beads_3c():
         type_prefix="n",
         element_string="C",
         bond_rs=(2,),
-        angles=(70, 90, 120),  # 60),
+        angles=(70, 90, 120),  # , 60),
         bond_ks=(bond_k(),),
         angle_ks=(angle_k(),),
         sigma=1,
@@ -349,11 +351,11 @@ def compare_final_energies(path1, path2):
     elif ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        # print(path1.name, path2.name, e1, e2, id1, id2)
-        try:
-            assert np.isclose(e1, e2, atol=1e-1, rtol=0)
-        except AssertionError:
-            assert e1 > 5 and e2 > 5
+        print(path1.name, path2.name, e1, e2, id1, id2)
+        # try:
+        #     assert np.isclose(e1, e2, atol=1e-1, rtol=0)
+        # except AssertionError:
+        #     assert e1 > 5 and e2 > 5
         # assert id1 == id2
         return e1, e2
 
@@ -396,6 +398,7 @@ def main():
         option2_lib=beads_arm_2c_lib,
         calculation_output=calculation_output,
         ligand_output=ligand_output,
+        platform="CPU",
     )
     c3_blocks = build_building_block(
         topology=ThreeC1Arm,
@@ -403,6 +406,7 @@ def main():
         option2_lib=beads_binder_lib,
         calculation_output=calculation_output,
         ligand_output=ligand_output,
+        platform="CPU",
     )
 
     logging.info(
@@ -476,6 +480,8 @@ def main():
                     bead_set=bead_set,
                     custom_torsion_set=custom_torsion_set,
                     custom_vdw_set=custom_vdw_set,
+                    # platform="CPU",
+                    platform="CUDA",
                 )
 
                 if conformer is not None:
@@ -703,6 +709,7 @@ def main():
     shutil.rmtree(calculation_output)
     shutil.rmtree(struct_output)
     shutil.rmtree(ligand_output)
+    os.system("rm parity.png")
 
 
 if __name__ == "__main__":

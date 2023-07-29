@@ -480,7 +480,8 @@ def main():
                     custom_torsion_set=custom_torsion_set,
                     custom_vdw_set=custom_vdw_set,
                     # platform="CPU",
-                    platform="CUDA",
+                    # platform="CUDA",
+                    platform=None,
                 )
 
                 if conformer is not None:

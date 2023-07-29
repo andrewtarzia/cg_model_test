@@ -10,7 +10,6 @@ Author: Andrew Tarzia
 """
 
 import logging
-import numpy as np
 import shutil
 import sys
 import pathlib

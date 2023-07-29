@@ -709,7 +709,6 @@ def main():
     shutil.rmtree(calculation_output)
     shutil.rmtree(struct_output)
     shutil.rmtree(ligand_output)
-    os.system("rm parity.png")
 
 
 if __name__ == "__main__":

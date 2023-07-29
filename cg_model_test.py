@@ -10,7 +10,8 @@ Author: Andrew Tarzia
 """
 
 import logging
-import shutil
+
+# import shutil
 import sys
 import pathlib
 import json
@@ -22,6 +23,7 @@ from rdkit import RDLogger
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
+from cgexplore.torsions import TargetTorsion
 from cgexplore.ensembles import Ensemble
 from cgexplore.generation_utilities import (
     run_constrained_optimisation,
@@ -215,46 +217,6 @@ def optimise_cage(
     return min_energy_conformer
 
 
-def target_torsions(bead_set, custom_torsion_option):
-    try:
-        (t_key_1,) = (i for i in bead_set if i[0] == "a")
-    except ValueError:
-        # For when 3+4 cages are being built - there are no target
-        # torsions.
-        return None
-
-    (c_key,) = (i for i in bead_set if i[0] == "c")
-    (t_key_2,) = (i for i in bead_set if i[0] == "b")
-    custom_torsion_set = {
-        (
-            t_key_2,
-            t_key_1,
-            c_key,
-            t_key_1,
-            t_key_2,
-        ): custom_torsion_option,
-    }
-    return custom_torsion_set
-
-
-def collect_custom_torsion(
-    bb2_bead_set,
-    custom_torsion_options,
-    custom_torsion,
-    bead_set,
-):
-    if custom_torsion_options[custom_torsion] is None:
-        custom_torsion_set = None
-    else:
-        tors_option = custom_torsion_options[custom_torsion]
-        custom_torsion_set = target_torsions(
-            bead_set=bead_set,
-            custom_torsion_option=tors_option,
-        )
-
-    return custom_torsion_set
-
-
 def bond_k():
     return 1e5
 
@@ -423,7 +385,19 @@ def main():
             "cl": c3_blocks,
         },
     }
-    custom_torsion_options = {"ton": (180, 50), "toff": None}
+    custom_torsion_options = {
+        "ton": (
+            TargetTorsion(
+                search_string="bacab",
+                search_estring="PbBaAgBaPb",
+                measured_atom_ids=[0, 1, 3, 4],
+                phi0=180,
+                torsion_k=50,
+                torsion_n=1.0,
+            ),
+        ),
+        "toff": (),
+    }
     custom_vdw_options = {"von": True}
 
     cages = []
@@ -450,13 +424,7 @@ def main():
             bead_set = bb2_bead_set.copy()
             bead_set.update(bbl_bead_set)
 
-            custom_torsion_set = collect_custom_torsion(
-                bb2_bead_set=bb2_bead_set,
-                custom_torsion_options=(custom_torsion_options),
-                custom_torsion=custom_torsion,
-                bead_set=bead_set,
-            )
-
+            custom_torsion_set = custom_torsion_options[custom_torsion]
             custom_vdw_set = custom_vdw_options[custom_vdw]
 
             for run in range(1):
@@ -536,11 +504,9 @@ def main():
             e2,
             c=c,
             edgecolor="none",
-            s=50,
+            s=100,
             alpha=1.0,
         )
-
-        custom_torsion_atoms = ("Pb", "Ba", "Ag", "Ba", "Pb")
 
         new_struct = stk.BuildingBlock.init_from_file(
             str(struct_output / f"{i}_optc.mol")
@@ -552,7 +518,7 @@ def main():
         assert new_struct.get_num_atoms() == old_struct.get_num_atoms()
         assert new_struct.get_num_bonds() == old_struct.get_num_bonds()
 
-        g_measure = GeomMeasure(custom_torsion_atoms)
+        g_measure = GeomMeasure(custom_torsion_options["ton"])
         bond_data1 = g_measure.calculate_bonds(old_struct)
         bond_data2 = g_measure.calculate_bonds(new_struct)
         for i in bond_data1:
@@ -566,7 +532,7 @@ def main():
                     bd2,
                     c=c,
                     edgecolor="none",
-                    s=50,
+                    s=100,
                     alpha=1.0,
                 )
 
@@ -583,19 +549,17 @@ def main():
                     bd2,
                     c=c,
                     edgecolor="none",
-                    s=50,
+                    s=100,
                     alpha=1.0,
                 )
 
         dihedral_data1 = g_measure.calculate_torsions(
             molecule=old_struct,
             absolute=True,
-            path_length=5,
         )
         dihedral_data2 = g_measure.calculate_torsions(
             molecule=new_struct,
             absolute=True,
-            path_length=5,
         )
         for i in dihedral_data1:
             assert i in dihedral_data2
@@ -607,7 +571,7 @@ def main():
                     bd2,
                     c=c,
                     edgecolor="none",
-                    s=50,
+                    s=100,
                     alpha=1.0,
                 )
 
@@ -620,7 +584,7 @@ def main():
             max_diameter2,
             c=c,
             edgecolor="none",
-            s=50,
+            s=100,
             alpha=1.0,
         )
 
@@ -633,7 +597,7 @@ def main():
             radius_gyration2,
             c=c,
             edgecolor="none",
-            s=50,
+            s=100,
             alpha=1.0,
         )
 
@@ -706,9 +670,9 @@ def main():
     )
     plt.close()
 
-    shutil.rmtree(calculation_output)
-    shutil.rmtree(struct_output)
-    shutil.rmtree(ligand_output)
+    # shutil.rmtree(calculation_output)
+    # shutil.rmtree(struct_output)
+    # shutil.rmtree(ligand_output)
 
 
 if __name__ == "__main__":

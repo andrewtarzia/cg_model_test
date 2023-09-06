@@ -10,8 +10,6 @@ Author: Andrew Tarzia
 """
 
 import logging
-
-# import shutil
 import sys
 import pathlib
 import json
@@ -34,6 +32,7 @@ from cgexplore.generation_utilities import (
     run_optimisation,
     run_soft_md_cycle,
     yield_shifted_models,
+    yield_near_models,
     optimise_ligand,
 )
 from cgexplore.geom import GeomMeasure
@@ -95,12 +94,13 @@ def optimise_cage(
         # max_iterations=50,
         platform=platform,
     )
+
     ensemble.add_conformer(conformer=conformer, source="opt1")
 
     # Run optimisations of series of conformers with shifted out
     # building blocks.
     logging.info(f"optimisation of shifted structures of {name}")
-    for test_molecule in yield_shifted_models(conformer.molecule, force_field):
+    for test_molecule in yield_shifted_models(molecule, force_field):
         conformer = run_optimisation(
             molecule=test_molecule,
             name=name,
@@ -111,6 +111,24 @@ def optimise_cage(
             platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="shifted")
+
+    # Collect and optimise structures nearby in phase space.
+    logging.info(f"optimisation of nearby structures of {name}")
+    for test_molecule in yield_near_models(
+        molecule=molecule,
+        name=name,
+        output_dir=output_dir,
+    ):
+        conformer = run_optimisation(
+            molecule=test_molecule,
+            name=name,
+            file_suffix="nopt",
+            output_dir=output_dir,
+            force_field=force_field,
+            # max_iterations=50,
+            platform=platform,
+        )
+        ensemble.add_conformer(conformer=conformer, source="nearby_opt")
 
     logging.info(f"soft MD run of {name}")
     num_steps = 20000
@@ -576,37 +594,44 @@ def main():
     ax_rg = axs[1][1]
     ax_md = axs[1][2]
 
+    cage_map = {
+        "4P6_3C1nb_2C1ca_f0": "4P6_3C1n0200b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f1": "4P6_3C1n0200b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f2": "4P6_3C1n0400b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f3": "4P6_3C1n0400b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f4": "4P6_3C1n0700b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f5": "4P6_3C1n0700b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f6": "4P6_3C1n0200b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f7": "4P6_3C1n0200b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f8": "4P6_3C1n0400b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f9": "4P6_3C1n0400b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f10": "4P6_3C1n0700b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f11": "4P6_3C1n0700b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f12": "4P6_3C1n0200b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f13": "4P6_3C1n0200b0000_2C1c0000a01700_toff",
+        "4P6_3C1nb_2C1ca_f14": "4P6_3C1n0400b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f15": "4P6_3C1n0400b0000_2C1c0000a01700_toff",
+        "4P6_3C1nb_2C1ca_f16": "4P6_3C1n0700b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f17": "4P6_3C1n0700b0000_2C1c0000a01700_toff",
+    }
+
+    structure_comparisons = []
+    old_cage_suffix = "_von_0"
     for i in cages:
-        print(i)
-        raise SystemExit()
-        if "ton" in i:
+        old_cage = cage_map[i]
+        if "ton" in old_cage:
             c = "r"
-        elif "toff" in i:
+        elif "toff" in old_cage:
             c = "gray"
 
-        if "a00" in i:
-            old = i.replace("a00", "a07")
-        elif "a01" in i:
-            old = i.replace("a01", "a014")
-        elif "a02" in i:
-            old = i.replace("a02", "a017")
-        elif "a03" in i:
-            old = i.replace("a03", "a018")
-
-        if "n00" in i:
-            old = old.replace("n00", "n02")
-        elif "n01" in i:
-            old = old.replace("n01", "n04")
-        elif "n02" in i:
-            old = old.replace("n02", "n07")
-        elif "n03" in i:
-            old = old.replace("n03", "n01")
         # compare_final_energies(
         #     path1=calculation_done / f"{old}_opt1_omm.out",
         #     path2=calculation_output / f"{i}_opt1_omm.out",
         # )
         e1, e2 = compare_final_energies(
-            path1=calculation_done / f"{old}_ensemble.json",
+            path1=(
+                calculation_done / f"{old_cage}{old_cage_suffix}_ensemble.json"
+            ),
             path2=calculation_output / f"{i}_ensemble.json",
         )
 
@@ -623,7 +648,11 @@ def main():
             str(struct_output / f"{i}_optc.mol")
         )
         old_struct = stk.BuildingBlock.init_from_file(
-            str(struct_done / f"{old}_optc.mol")
+            str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")
+        )
+        structure_comparisons.append(
+            f'{str(struct_output / f"{i}_optc.mol")} '
+            f'{str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")}'
         )
 
         assert new_struct.get_num_atoms() == old_struct.get_num_atoms()
@@ -797,22 +826,7 @@ def main():
     )
     plt.close()
 
-    # shutil.rmtree(calculation_output)
-    # shutil.rmtree(struct_output)
-    # shutil.rmtree(ligand_output)
-    raise SystemExit()
-
-    raise SystemExit("define bond, angle, torsion, vdw objects")
-    raise SystemExit(
-        "these provide a way to set the force field in python code - "
-        "smarts, values"
-    )
-    raise SystemExit("use openFF to use the FF xml file written by this code")
-    raise SystemExit(
-        "rewrite the optimiser classes to handle this and remove the "
-        "default behaviour"
-    )
-    raise SystemExit()
+    print("\n".join(structure_comparisons))
 
 
 if __name__ == "__main__":

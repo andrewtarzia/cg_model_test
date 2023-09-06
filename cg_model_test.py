@@ -10,8 +10,6 @@ Author: Andrew Tarzia
 """
 
 import logging
-
-# import shutil
 import sys
 import pathlib
 import json
@@ -23,18 +21,22 @@ from rdkit import RDLogger
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-from cgexplore.torsions import TargetTorsion
+from cgexplore.bonds import TargetBondRange
+from cgexplore.angles import TargetAngleRange
+from cgexplore.torsions import TargetTorsionRange, TargetTorsion
+from cgexplore.nonbonded import TargetNonbondedRange
 from cgexplore.ensembles import Ensemble
+from cgexplore.forcefield import ForceFieldLibrary
 from cgexplore.generation_utilities import (
     run_constrained_optimisation,
     run_optimisation,
     run_soft_md_cycle,
-    yield_near_models,
     yield_shifted_models,
+    yield_near_models,
+    optimise_ligand,
 )
 from cgexplore.geom import GeomMeasure
-from cgexplore.beads import bead_library_check, produce_bead_library
-from cgexplore.generation_utilities import build_building_block
+from cgexplore.beads import bead_library_check, CgBead
 from cgexplore.molecule_construction.topologies import ThreeC1Arm, TwoC1Arm
 from cgexplore.utilities import check_directory
 
@@ -49,9 +51,7 @@ def optimise_cage(
     molecule,
     name,
     output_dir,
-    bead_set,
-    custom_torsion_set,
-    custom_vdw_set,
+    force_field,
     platform,
 ):
     fina_mol_file = os.path.join(output_dir, f"{name}_final.mol")
@@ -75,10 +75,9 @@ def optimise_cage(
 
     molecule = run_constrained_optimisation(
         molecule=molecule,
-        bead_set=bead_set,
         name=name,
         output_dir=output_dir,
-        custom_vdw_set=custom_vdw_set,
+        force_field=force_field,
         bond_ff_scale=10,
         angle_ff_scale=10,
         max_iterations=20,
@@ -88,37 +87,26 @@ def optimise_cage(
     logging.info(f"optimisation of {name}")
     conformer = run_optimisation(
         molecule=molecule,
-        bead_set=bead_set,
         name=name,
         file_suffix="opt1",
         output_dir=output_dir,
-        custom_vdw_set=custom_vdw_set,
-        custom_torsion_set=custom_torsion_set,
-        bonds=True,
-        angles=True,
-        torsions=False,
-        vdw_bond_cutoff=2,
+        force_field=force_field,
         # max_iterations=50,
         platform=platform,
     )
+
     ensemble.add_conformer(conformer=conformer, source="opt1")
 
     # Run optimisations of series of conformers with shifted out
     # building blocks.
     logging.info(f"optimisation of shifted structures of {name}")
-    for test_molecule in yield_shifted_models(molecule, bead_set):
+    for test_molecule in yield_shifted_models(molecule, force_field):
         conformer = run_optimisation(
             molecule=test_molecule,
-            bead_set=bead_set,
             name=name,
             file_suffix="sopt",
             output_dir=output_dir,
-            custom_vdw_set=custom_vdw_set,
-            custom_torsion_set=custom_torsion_set,
-            bonds=True,
-            angles=True,
-            torsions=False,
-            vdw_bond_cutoff=2,
+            force_field=force_field,
             # max_iterations=50,
             platform=platform,
         )
@@ -129,21 +117,14 @@ def optimise_cage(
     for test_molecule in yield_near_models(
         molecule=molecule,
         name=name,
-        bead_set=bead_set,
         output_dir=output_dir,
     ):
         conformer = run_optimisation(
             molecule=test_molecule,
-            bead_set=bead_set,
             name=name,
             file_suffix="nopt",
             output_dir=output_dir,
-            custom_vdw_set=custom_vdw_set,
-            custom_torsion_set=custom_torsion_set,
-            bonds=True,
-            angles=True,
-            torsions=False,
-            vdw_bond_cutoff=2,
+            force_field=force_field,
             # max_iterations=50,
             platform=platform,
         )
@@ -155,10 +136,8 @@ def optimise_cage(
     soft_md_trajectory = run_soft_md_cycle(
         name=name,
         molecule=ensemble.get_lowest_e_conformer().molecule,
-        bead_set=bead_set,
         output_dir=output_dir,
-        custom_vdw_set=custom_vdw_set,
-        custom_torsion_set=None,
+        force_field=force_field,
         suffix="smd",
         bond_ff_scale=10,
         angle_ff_scale=10,
@@ -188,16 +167,10 @@ def optimise_cage(
     for md_conformer in soft_md_trajectory.yield_conformers():
         conformer = run_optimisation(
             molecule=md_conformer.molecule,
-            bead_set=bead_set,
             name=name,
             file_suffix="smd_mdc",
             output_dir=output_dir,
-            custom_vdw_set=custom_vdw_set,
-            custom_torsion_set=custom_torsion_set,
-            bonds=True,
-            angles=True,
-            torsions=False,
-            vdw_bond_cutoff=2,
+            force_field=force_field,
             # max_iterations=50,
             platform=platform,
         )
@@ -215,70 +188,6 @@ def optimise_cage(
 
     min_energy_conformer.molecule.write(fina_mol_file)
     return min_energy_conformer
-
-
-def bond_k():
-    return 1e5
-
-
-def angle_k():
-    return 1e2
-
-
-def core_2c_beads():
-    return produce_bead_library(
-        type_prefix="c",
-        element_string="Ag",
-        angles=(180,),
-        bond_rs=(2,),
-        bond_ks=(bond_k(),),
-        angle_ks=(angle_k(),),
-        sigma=1,
-        epsilon=10.0,
-        coordination=2,
-    )
-
-
-def arm_2c_beads():
-    return produce_bead_library(
-        type_prefix="a",
-        element_string="Ba",
-        bond_rs=(1,),
-        angles=(125, 160, 175),  # , 180),
-        bond_ks=(bond_k(),),
-        angle_ks=(angle_k(),),
-        sigma=1,
-        epsilon=10.0,
-        coordination=2,
-    )
-
-
-def binder_beads():
-    return produce_bead_library(
-        type_prefix="b",
-        element_string="Pb",
-        bond_rs=(1,),
-        angles=(180,),
-        bond_ks=(bond_k(),),
-        angle_ks=(angle_k(),),
-        sigma=1,
-        epsilon=10.0,
-        coordination=2,
-    )
-
-
-def beads_3c():
-    return produce_bead_library(
-        type_prefix="n",
-        element_string="C",
-        bond_rs=(2,),
-        angles=(70, 90, 120),  # , 60),
-        bond_ks=(bond_k(),),
-        angle_ks=(angle_k(),),
-        sigma=1,
-        epsilon=10.0,
-        coordination=3,
-    )
 
 
 def get_final_energy(path):
@@ -321,6 +230,250 @@ def compare_final_energies(path1, path2):
         return e1, e2
 
 
+def define_forcefield_library(full_bead_library, calculation_output, prefix):
+    forcefieldlibrary = ForceFieldLibrary(
+        bead_library=full_bead_library,
+        vdw_bond_cutoff=2,
+    )
+    forcefieldlibrary.add_bond_range(
+        TargetBondRange(
+            class1="a",
+            class2="c",
+            eclass1="Ba",
+            eclass2="Ag",
+            bond_rs=(
+                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
+            ),
+            bond_ks=(
+                openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_bond_range(
+        TargetBondRange(
+            class1="a",
+            class2="b",
+            eclass1="Ba",
+            eclass2="Pb",
+            bond_rs=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+            bond_ks=(
+                openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_bond_range(
+        TargetBondRange(
+            class1="b",
+            class2="n",
+            eclass1="Pb",
+            eclass2="C",
+            bond_rs=(
+                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
+            ),
+            bond_ks=(
+                openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+        )
+    )
+
+    forcefieldlibrary.add_angle_range(
+        TargetAngleRange(
+            class1="a",
+            class2="c",
+            class3="a",
+            eclass1="Ba",
+            eclass2="Ag",
+            eclass3="Ba",
+            angles=(
+                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_angle_range(
+        TargetAngleRange(
+            class1="b",
+            class2="a",
+            class3="c",
+            eclass1="Pb",
+            eclass2="Ba",
+            eclass3="Ag",
+            angles=(
+                openmm.unit.Quantity(value=125, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=175, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_angle_range(
+        TargetAngleRange(
+            class1="n",
+            class2="b",
+            class3="a",
+            eclass1="C",
+            eclass2="Pb",
+            eclass3="Ba",
+            angles=(
+                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_angle_range(
+        TargetAngleRange(
+            class1="b",
+            class2="n",
+            class3="b",
+            eclass1="Pb",
+            eclass2="C",
+            eclass3="Pb",
+            angles=(
+                openmm.unit.Quantity(value=70, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=120, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
+
+    forcefieldlibrary.add_torsion_range(
+        TargetTorsionRange(
+            search_string=("b", "a", "c", "a", "b"),
+            search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
+            measured_atom_ids=[0, 1, 3, 4],
+            phi0s=(openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),),
+            torsion_ks=(
+                openmm.unit.Quantity(
+                    value=50,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+                openmm.unit.Quantity(
+                    value=0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            torsion_ns=(1,),
+        )
+    )
+
+    forcefieldlibrary.add_nonbonded_range(
+        TargetNonbondedRange(
+            "a",
+            "Ba",
+            epsilons=(
+                openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            sigmas=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+        )
+    )
+    forcefieldlibrary.add_nonbonded_range(
+        TargetNonbondedRange(
+            "c",
+            "Ag",
+            epsilons=(
+                openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            sigmas=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+        )
+    )
+    forcefieldlibrary.add_nonbonded_range(
+        TargetNonbondedRange(
+            "n",
+            "C",
+            epsilons=(
+                openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            sigmas=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+        )
+    )
+    forcefieldlibrary.add_nonbonded_range(
+        TargetNonbondedRange(
+            "b",
+            "Pb",
+            epsilons=(
+                openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            sigmas=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+        )
+    )
+
+    count = 0
+    for force_field in forcefieldlibrary.yield_forcefields(
+        prefix=prefix, output_path=calculation_output
+    ):
+        force_field.write_xml_file()
+        count += 1
+
+    logging.info(f"there are {count} forcefields")
+    return forcefieldlibrary
+
+
 def main():
     first_line = f"Usage: {__file__}.py path "
     if not len(sys.argv) == 2:
@@ -328,6 +481,8 @@ def main():
         sys.exit()
     else:
         path = sys.argv[1]
+
+    prefix = "cg_model_test"
 
     struct_output = pathlib.Path().absolute() / path / "structures"
     check_directory(struct_output)
@@ -340,123 +495,95 @@ def main():
     calculation_done = pathlib.Path().absolute() / path / "calculations_done"
 
     # Define bead libraries.
-    beads_core_2c_lib = core_2c_beads()
-    beads_3c_lib = beads_3c()
-    beads_arm_2c_lib = arm_2c_beads()
-    beads_binder_lib = binder_beads()
-    full_bead_library = (
-        list(beads_3c_lib.values())
-        + list(beads_arm_2c_lib.values())
-        + list(beads_core_2c_lib.values())
-        + list(beads_binder_lib.values())
+    core_bead = CgBead(
+        element_string="Ag",
+        bead_type="c",
+        coordination=2,
     )
+    arm_bead = CgBead(
+        element_string="Ba",
+        bead_type="a",
+        coordination=2,
+    )
+    binder_bead = CgBead(
+        element_string="Pb",
+        bead_type="b",
+        coordination=2,
+    )
+    trigonal_bead = CgBead(
+        element_string="C",
+        bead_type="n",
+        coordination=2,
+    )
+    full_bead_library = (core_bead, arm_bead, binder_bead, trigonal_bead)
     bead_library_check(full_bead_library)
 
-    logging.info("building building blocks")
-    c2_blocks = build_building_block(
-        topology=TwoC1Arm,
-        option1_lib=beads_core_2c_lib,
-        option2_lib=beads_arm_2c_lib,
+    logging.info(f"defining force field for {prefix}")
+    forcefieldlibrary = define_forcefield_library(
+        full_bead_library=full_bead_library,
         calculation_output=calculation_output,
-        ligand_output=ligand_output,
-        platform="CPU",
-    )
-    c3_blocks = build_building_block(
-        topology=ThreeC1Arm,
-        option1_lib=beads_3c_lib,
-        option2_lib=beads_binder_lib,
-        calculation_output=calculation_output,
-        ligand_output=ligand_output,
-        platform="CPU",
+        prefix=prefix,
     )
 
-    logging.info(
-        f"there are {len(c2_blocks)} 2-C and "
-        f"{len(c3_blocks)} 3-C and building blocks."
-    )
+    logging.info("building building blocks")
+    ditopic = TwoC1Arm(bead=core_bead, abead1=arm_bead)
+    tritopic = ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
+    for force_field in forcefieldlibrary.yield_forcefields(
+        prefix=prefix, output_path=calculation_output
+    ):
+        for bb in (ditopic, tritopic):
+            temp_name = f"{bb.get_name()}_f{force_field.get_identifier()}"
+            opt_bb = optimise_ligand(
+                molecule=bb.get_building_block(),
+                name=temp_name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                platform="CPU",
+            )
+            opt_bb.write(str(ligand_output / f"{temp_name}_optl.mol"))
 
     # Define list of topology functions.
     cage_3p2_topologies = {"4P6": stk.cage.FourPlusSix}
 
-    populations = {
-        "2p3": {
-            "t": cage_3p2_topologies,
-            "c2": c2_blocks,
-            "cl": c3_blocks,
-        },
-    }
-    custom_torsion_options = {
-        "ton": (
-            TargetTorsion(
-                search_string=("b", "a", "c", "a", "b"),
-                search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
-                measured_atom_ids=[0, 1, 3, 4],
-                phi0=180,
-                torsion_k=50,
-                torsion_n=1.0,
-            ),
-        ),
-        "toff": (),
-    }
-    custom_vdw_options = {"von": True}
-
     cages = []
-    for popn in populations:
-        popn_iterator = itertools.product(
-            populations[popn]["t"],
-            populations[popn]["c2"],
-            populations[popn]["cl"],
-            custom_torsion_options,
-            custom_vdw_options,
+    popn_iterator = itertools.product(
+        cage_3p2_topologies,
+        tuple(
+            forcefieldlibrary.yield_forcefields(
+                prefix=prefix, output_path=calculation_output
+            )
+        ),
+    )
+    for cage_topo_str, force_field in popn_iterator:
+        name = (
+            f"{cage_topo_str}_{tritopic.get_name()}_"
+            f"{ditopic.get_name()}_"
+            f"f{force_field.get_identifier()}"
         )
-        for iteration in popn_iterator:
-            (
-                cage_topo_str,
-                bb2_str,
-                bbl_str,
-                custom_torsion,
-                custom_vdw,
-            ) = iteration
 
-            bb2, bb2_bead_set = populations[popn]["c2"][bb2_str]
-            bbl, bbl_bead_set = populations[popn]["cl"][bbl_str]
+        logging.info(f"building {name}")
+        cage = stk.ConstructedMolecule(
+            topology_graph=cage_3p2_topologies[cage_topo_str](
+                building_blocks=(
+                    tritopic.get_building_block(),
+                    ditopic.get_building_block(),
+                ),
+            ),
+        )
 
-            bead_set = bb2_bead_set.copy()
-            bead_set.update(bbl_bead_set)
+        conformer = optimise_cage(
+            molecule=cage,
+            name=name,
+            output_dir=calculation_output,
+            force_field=force_field,
+            # platform="CPU",
+            # platform="CUDA",
+            platform=None,
+        )
 
-            custom_torsion_set = custom_torsion_options[custom_torsion]
-            custom_vdw_set = custom_vdw_options[custom_vdw]
-
-            for run in range(1):
-                name = (
-                    f"{cage_topo_str}_{bbl_str}_{bb2_str}_"
-                    f"{custom_torsion}_{custom_vdw}_{run}"
-                )
-
-                logging.info(f"building {name}")
-                cage = stk.ConstructedMolecule(
-                    topology_graph=populations[popn]["t"][cage_topo_str](
-                        building_blocks=(bb2, bbl),
-                    ),
-                )
-
-                conformer = optimise_cage(
-                    molecule=cage,
-                    name=name,
-                    output_dir=calculation_output,
-                    bead_set=bead_set,
-                    custom_torsion_set=custom_torsion_set,
-                    custom_vdw_set=custom_vdw_set,
-                    # platform="CPU",
-                    # platform="CUDA",
-                    platform=None,
-                )
-
-                if conformer is not None:
-                    conformer.molecule.write(
-                        str(struct_output / f"{name}_optc.mol")
-                    )
-                cages.append(name)
+        if conformer is not None:
+            conformer.molecule.write(str(struct_output / f"{name}_optc.mol"))
+        cages.append(name)
 
     fig, axs = plt.subplots(ncols=3, nrows=2, figsize=(16, 8))
 
@@ -467,35 +594,44 @@ def main():
     ax_rg = axs[1][1]
     ax_md = axs[1][2]
 
+    cage_map = {
+        "4P6_3C1nb_2C1ca_f0": "4P6_3C1n0200b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f1": "4P6_3C1n0200b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f2": "4P6_3C1n0400b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f3": "4P6_3C1n0400b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f4": "4P6_3C1n0700b0000_2C1c0000a0700_ton",
+        "4P6_3C1nb_2C1ca_f5": "4P6_3C1n0700b0000_2C1c0000a0700_toff",
+        "4P6_3C1nb_2C1ca_f6": "4P6_3C1n0200b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f7": "4P6_3C1n0200b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f8": "4P6_3C1n0400b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f9": "4P6_3C1n0400b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f10": "4P6_3C1n0700b0000_2C1c0000a01400_ton",
+        "4P6_3C1nb_2C1ca_f11": "4P6_3C1n0700b0000_2C1c0000a01400_toff",
+        "4P6_3C1nb_2C1ca_f12": "4P6_3C1n0200b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f13": "4P6_3C1n0200b0000_2C1c0000a01700_toff",
+        "4P6_3C1nb_2C1ca_f14": "4P6_3C1n0400b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f15": "4P6_3C1n0400b0000_2C1c0000a01700_toff",
+        "4P6_3C1nb_2C1ca_f16": "4P6_3C1n0700b0000_2C1c0000a01700_ton",
+        "4P6_3C1nb_2C1ca_f17": "4P6_3C1n0700b0000_2C1c0000a01700_toff",
+    }
+
+    structure_comparisons = []
+    old_cage_suffix = "_von_0"
     for i in cages:
-        if "ton" in i:
+        old_cage = cage_map[i]
+        if "ton" in old_cage:
             c = "r"
-        elif "toff" in i:
+        elif "toff" in old_cage:
             c = "gray"
 
-        if "a00" in i:
-            old = i.replace("a00", "a07")
-        elif "a01" in i:
-            old = i.replace("a01", "a014")
-        elif "a02" in i:
-            old = i.replace("a02", "a017")
-        elif "a03" in i:
-            old = i.replace("a03", "a018")
-
-        if "n00" in i:
-            old = old.replace("n00", "n02")
-        elif "n01" in i:
-            old = old.replace("n01", "n04")
-        elif "n02" in i:
-            old = old.replace("n02", "n07")
-        elif "n03" in i:
-            old = old.replace("n03", "n01")
         # compare_final_energies(
         #     path1=calculation_done / f"{old}_opt1_omm.out",
         #     path2=calculation_output / f"{i}_opt1_omm.out",
         # )
         e1, e2 = compare_final_energies(
-            path1=calculation_done / f"{old}_ensemble.json",
+            path1=(
+                calculation_done / f"{old_cage}{old_cage_suffix}_ensemble.json"
+            ),
             path2=calculation_output / f"{i}_ensemble.json",
         )
 
@@ -512,13 +648,33 @@ def main():
             str(struct_output / f"{i}_optc.mol")
         )
         old_struct = stk.BuildingBlock.init_from_file(
-            str(struct_done / f"{old}_optc.mol")
+            str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")
+        )
+        structure_comparisons.append(
+            f'{str(struct_output / f"{i}_optc.mol")} '
+            f'{str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")}'
         )
 
         assert new_struct.get_num_atoms() == old_struct.get_num_atoms()
         assert new_struct.get_num_bonds() == old_struct.get_num_bonds()
 
-        g_measure = GeomMeasure(custom_torsion_options["ton"])
+        g_measure = GeomMeasure(
+            target_torsions=(
+                TargetTorsion(
+                    search_string=("b", "a", "c", "a", "b"),
+                    search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
+                    measured_atom_ids=[0, 1, 3, 4],
+                    phi0=openmm.unit.Quantity(
+                        value=180, unit=openmm.unit.degrees
+                    ),
+                    torsion_k=openmm.unit.Quantity(
+                        value=50,
+                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    ),
+                    torsion_n=1,
+                ),
+            )
+        )
         bond_data1 = g_measure.calculate_bonds(old_struct)
         bond_data2 = g_measure.calculate_bonds(new_struct)
         for i in bond_data1:
@@ -670,9 +826,7 @@ def main():
     )
     plt.close()
 
-    # shutil.rmtree(calculation_output)
-    # shutil.rmtree(struct_output)
-    # shutil.rmtree(ligand_output)
+    print("\n".join(structure_comparisons))
 
 
 if __name__ == "__main__":

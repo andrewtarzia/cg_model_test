@@ -19,10 +19,11 @@ import os
 from openmm import openmm
 from rdkit import RDLogger
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.lines import Line2D
 
 from cgexplore.bonds import TargetBondRange
-from cgexplore.angles import TargetAngleRange
+from cgexplore.angles import TargetAngleRange, PyramidAngleRange
 from cgexplore.torsions import TargetTorsionRange, TargetTorsion
 from cgexplore.nonbonded import TargetNonbondedRange
 from cgexplore.ensembles import Ensemble
@@ -37,7 +38,11 @@ from cgexplore.generation_utilities import (
 )
 from cgexplore.geom import GeomMeasure
 from cgexplore.beads import bead_library_check, CgBead
-from cgexplore.molecule_construction.topologies import ThreeC1Arm, TwoC1Arm
+from cgexplore.molecule_construction.topologies import (
+    ThreeC1Arm,
+    TwoC1Arm,
+    FourC1Arm,
+)
 from cgexplore.utilities import check_directory
 
 logging.basicConfig(
@@ -94,7 +99,6 @@ def optimise_cage(
         # max_iterations=50,
         platform=platform,
     )
-
     ensemble.add_conformer(conformer=conformer, source="opt1")
 
     # Run optimisations of series of conformers with shifted out
@@ -221,11 +225,11 @@ def compare_final_energies(path1, path2):
     elif ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        print(path1.name, path2.name, e1, e2, id1, id2)
-        # try:
-        #     assert np.isclose(e1, e2, atol=1e-1, rtol=0)
-        # except AssertionError:
-        #     assert e1 > 5 and e2 > 5
+        print("    ", path1.name, path2.name, e1, e2, id1, id2)
+        try:
+            assert np.isclose(e1, e2, atol=1e-1, rtol=0)
+        except AssertionError:
+            assert e1 > 5 and e2 > 5
         # assert id1 == id2
         return e1, e2
 
@@ -292,6 +296,25 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             ),
         )
     )
+    forcefieldlibrary.add_bond_range(
+        TargetBondRange(
+            class1="b",
+            class2="m",
+            eclass1="Pb",
+            eclass2="Pd",
+            bond_rs=(
+                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
+            ),
+            bond_ks=(
+                openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+        )
+    )
 
     forcefieldlibrary.add_angle_range(
         TargetAngleRange(
@@ -324,6 +347,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             eclass3="Ag",
             angles=(
                 openmm.unit.Quantity(value=125, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=135, unit=openmm.unit.degrees),
                 openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
                 openmm.unit.Quantity(value=175, unit=openmm.unit.degrees),
             ),
@@ -343,6 +367,27 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             class2="b",
             class3="a",
             eclass1="C",
+            eclass2="Pb",
+            eclass3="Ba",
+            angles=(
+                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
+    forcefieldlibrary.add_angle_range(
+        TargetAngleRange(
+            class1="m",
+            class2="b",
+            class3="a",
+            eclass1="Pd",
             eclass2="Pb",
             eclass3="Ba",
             angles=(
@@ -381,6 +426,28 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             ),
         )
     )
+    forcefieldlibrary.add_angle_range(
+        PyramidAngleRange(
+            class1="b",
+            class2="m",
+            class3="b",
+            eclass1="Pd",
+            eclass2="Pb",
+            eclass3="Pd",
+            angles=(
+                openmm.unit.Quantity(value=80, unit=openmm.unit.degrees),
+                openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
+            ),
+            angle_ks=(
+                openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+        )
+    )
 
     forcefieldlibrary.add_torsion_range(
         TargetTorsionRange(
@@ -404,8 +471,8 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
 
     forcefieldlibrary.add_nonbonded_range(
         TargetNonbondedRange(
-            "a",
-            "Ba",
+            bead_class="a",
+            bead_element="Ba",
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
@@ -419,8 +486,8 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
     )
     forcefieldlibrary.add_nonbonded_range(
         TargetNonbondedRange(
-            "c",
-            "Ag",
+            bead_class="c",
+            bead_element="Ag",
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
@@ -434,8 +501,8 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
     )
     forcefieldlibrary.add_nonbonded_range(
         TargetNonbondedRange(
-            "n",
-            "C",
+            bead_class="n",
+            bead_element="C",
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
@@ -449,8 +516,23 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
     )
     forcefieldlibrary.add_nonbonded_range(
         TargetNonbondedRange(
-            "b",
-            "Pb",
+            bead_class="m",
+            bead_element="Pb",
+            epsilons=(
+                openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                ),
+            ),
+            sigmas=(
+                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+            ),
+        )
+    )
+    forcefieldlibrary.add_nonbonded_range(
+        TargetNonbondedRange(
+            bead_class="b",
+            bead_element="Pb",
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
@@ -497,25 +579,41 @@ def main():
     # Define bead libraries.
     core_bead = CgBead(
         element_string="Ag",
-        bead_type="c",
+        bead_class="c",
+        bead_type="c1",
         coordination=2,
     )
     arm_bead = CgBead(
         element_string="Ba",
-        bead_type="a",
+        bead_class="a",
+        bead_type="a1",
         coordination=2,
     )
     binder_bead = CgBead(
         element_string="Pb",
-        bead_type="b",
+        bead_class="b",
+        bead_type="b1",
         coordination=2,
     )
     trigonal_bead = CgBead(
         element_string="C",
-        bead_type="n",
-        coordination=2,
+        bead_class="n",
+        bead_type="n1",
+        coordination=3,
     )
-    full_bead_library = (core_bead, arm_bead, binder_bead, trigonal_bead)
+    tetragonal_bead = CgBead(
+        element_string="Pd",
+        bead_class="m",
+        bead_type="m1",
+        coordination=4,
+    )
+    full_bead_library = (
+        core_bead,
+        arm_bead,
+        binder_bead,
+        trigonal_bead,
+        tetragonal_bead,
+    )
     bead_library_check(full_bead_library)
 
     logging.info(f"defining force field for {prefix}")
@@ -525,65 +623,162 @@ def main():
         prefix=prefix,
     )
 
-    logging.info("building building blocks")
+    logging.info("defining building blocks")
     ditopic = TwoC1Arm(bead=core_bead, abead1=arm_bead)
     tritopic = ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
-    for force_field in forcefieldlibrary.yield_forcefields(
-        prefix=prefix, output_path=calculation_output
-    ):
-        for bb in (ditopic, tritopic):
-            temp_name = f"{bb.get_name()}_f{force_field.get_identifier()}"
-            opt_bb = optimise_ligand(
-                molecule=bb.get_building_block(),
-                name=temp_name,
+    tetratopic = FourC1Arm(bead=tetragonal_bead, abead1=binder_bead)
+
+    # Define list of topology functions.
+    cage_2p3_topologies = {"4P6": stk.cage.FourPlusSix}
+    cage_2p4_topologies = {"6P12": stk.cage.M6L12Cube}
+
+    populations = {
+        "2p4": {
+            "topologies": cage_2p4_topologies,
+            "c2": ditopic,
+            "cl": tetratopic,
+        },
+        "2p3": {
+            "topologies": cage_2p3_topologies,
+            "c2": ditopic,
+            "cl": tritopic,
+        },
+    }
+
+    cages = []
+    for population in populations:
+        logging.info(f"running population {population}")
+        popn_dict = populations[population]
+        popn_iterator = itertools.product(
+            popn_dict["topologies"],
+            tuple(
+                forcefieldlibrary.yield_forcefields(
+                    prefix=prefix, output_path=calculation_output
+                )
+            ),
+        )
+        for cage_topo_str, force_field in popn_iterator:
+            c2_precursor = popn_dict["c2"]
+            cl_precursor = popn_dict["cl"]
+            name = (
+                f"{cage_topo_str}_{cl_precursor.get_name()}_"
+                f"{c2_precursor.get_name()}_"
+                f"f{force_field.get_identifier()}"
+            )
+
+            # Optimise building blocks.
+            c2_name = (
+                f"{c2_precursor.get_name()}_f{force_field.get_identifier()}"
+            )
+            c2_building_block = optimise_ligand(
+                molecule=c2_precursor.get_building_block(),
+                name=c2_name,
                 output_dir=calculation_output,
                 force_field=force_field,
                 platform="CPU",
             )
-            opt_bb.write(str(ligand_output / f"{temp_name}_optl.mol"))
+            c2_building_block.write(str(ligand_output / f"{c2_name}_optl.mol"))
 
-    # Define list of topology functions.
-    cage_3p2_topologies = {"4P6": stk.cage.FourPlusSix}
-
-    cages = []
-    popn_iterator = itertools.product(
-        cage_3p2_topologies,
-        tuple(
-            forcefieldlibrary.yield_forcefields(
-                prefix=prefix, output_path=calculation_output
+            cl_name = (
+                f"{cl_precursor.get_name()}_f{force_field.get_identifier()}"
             )
-        ),
-    )
-    for cage_topo_str, force_field in popn_iterator:
-        name = (
-            f"{cage_topo_str}_{tritopic.get_name()}_"
-            f"{ditopic.get_name()}_"
-            f"f{force_field.get_identifier()}"
-        )
+            cl_building_block = optimise_ligand(
+                molecule=cl_precursor.get_building_block(),
+                name=cl_name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                platform="CPU",
+            )
+            cl_building_block.write(str(ligand_output / f"{cl_name}_optl.mol"))
 
-        logging.info(f"building {name}")
-        cage = stk.ConstructedMolecule(
-            topology_graph=cage_3p2_topologies[cage_topo_str](
-                building_blocks=(
-                    tritopic.get_building_block(),
-                    ditopic.get_building_block(),
+            logging.info(f"building {name}")
+            cage = stk.ConstructedMolecule(
+                topology_graph=popn_dict["topologies"][cage_topo_str](
+                    building_blocks=(c2_building_block, cl_building_block),
                 ),
-            ),
-        )
+            )
 
-        conformer = optimise_cage(
-            molecule=cage,
-            name=name,
-            output_dir=calculation_output,
-            force_field=force_field,
-            # platform="CPU",
-            # platform="CUDA",
-            platform=None,
-        )
+            conformer = optimise_cage(
+                molecule=cage,
+                name=name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                # platform="CPU",
+                # platform="CUDA",
+                platform=None,
+            )
+            if conformer is not None:
+                conformer.molecule.write(
+                    str(struct_output / f"{name}_optc.mol")
+                )
 
-        if conformer is not None:
-            conformer.molecule.write(str(struct_output / f"{name}_optc.mol"))
-        cages.append(name)
+            cages.append(name)
+
+    with open(calculation_output / f"{prefix}_iterations.json", "r") as f:
+        iterations = json.load(f)
+
+    bonds_set = (
+        "TargetBond(class1='a', class2='c', eclass1='Ba', eclass2='Ag', "
+        "bond_r=Quantity(value=1.5, unit=angstrom), bond_k=Quantity(valu"
+        "e=100000.0, unit=kilojoule/(nanometer**2*mole)));     TargetBon"
+        "d(class1='a', class2='b', eclass1='Ba', eclass2='Pb', bond_r=Qu"
+        "antity(value=1.0, unit=angstrom), bond_k=Quantity(value=100000."
+        "0, unit=kilojoule/(nanometer**2*mole)));     TargetBond(class1="
+        "'b', class2='n', eclass1='Pb', eclass2='C', bond_r=Quantity(val"
+        "ue=1.5, unit=angstrom), bond_k=Quantity(value=100000.0, unit=ki"
+        "lojoule/(nanometer**2*mole)));     TargetBond(class1='b', class"
+        "2='m', eclass1='Pb', eclass2='Pd', bond_r=Quantity(value=1.5, u"
+        "nit=angstrom), bond_k=Quantity(value=100000.0, unit=kilojoule/("
+        "nanometer**2*mole)))"
+    )
+    nonbondeds_set = (
+        "TargetNonbonded(bead_class='a', bead_element='Ba', sigma=Quanti"
+        "ty(value=1.0, unit=angstrom), epsilon=Quantity(value=10.0, unit"
+        "=kilojoule/mole));     TargetNonbonded(bead_class='c', bead_ele"
+        "ment='Ag', sigma=Quantity(value=1.0, unit=angstrom), epsilon=Qu"
+        "antity(value=10.0, unit=kilojoule/mole));     TargetNonbonded(b"
+        "ead_class='n', bead_element='C', sigma=Quantity(value=1.0, unit"
+        "=angstrom), epsilon=Quantity(value=10.0, unit=kilojoule/mole));"
+        "     TargetNonbonded(bead_class='m', bead_element='Pb', sigma=Q"
+        "uantity(value=1.0, unit=angstrom), epsilon=Quantity(value=10.0,"
+        " unit=kilojoule/mole));     TargetNonbonded(bead_class='b', bea"
+        "d_element='Pb', sigma=Quantity(value=1.0, unit=angstrom), epsil"
+        "on=Quantity(value=10.0, unit=kilojoule/mole))"
+    )
+    torsions_set = ""
+    bac_string = "1='b', 2='a', 3='c'"
+    bnb_string = "1='b', 2='n', 3='b'"
+    bmb_string = "1='b', 2='m', 3='b'"
+    for ite in iterations:
+        dic = iterations[ite]
+        if dic["bonds"] != bonds_set:
+            raise ValueError("bonds does not match set")
+        if dic["nonbondeds"] != nonbondeds_set:
+            raise ValueError("nonbondeds does not match set")
+        if dic["torsions"] != torsions_set:
+            raise ValueError("torsions does not match set")
+
+        for angle in dic["angles"].split("TargetAngle"):
+            split_str = "".join(angle.split("class"))
+            if bac_string in split_str:
+                bac_value = split_str.split("value=")[1].split(", unit")[0]
+            if bnb_string in split_str:
+                bnb_value = split_str.split("value=")[1].split(", unit")[0]
+
+        for angle in dic["custom_angles"].split("TargetPyramidAngle"):
+            split_str = "".join(angle.split("class"))
+            if bmb_string in split_str:
+                bmb_value = split_str.split("value=")[1].split(", unit")[0]
+
+        for torsion in dic["custom_torsions"].split("TargetTorsion"):
+            if "torsion_k" in torsion:
+                split_str = "".join(torsion.split("torsion_k")[1])
+                torsion_value = split_str.split("value=")[1].split(", unit")[0]
+
+        print(
+            f"{ite}, bac: {bac_value}, bnb: {bnb_value}, "
+            f"bmb: {bmb_value}, tors: {torsion_value}"
+        )
 
     fig, axs = plt.subplots(ncols=3, nrows=2, figsize=(16, 8))
 
@@ -593,32 +788,92 @@ def main():
     ax_tors = axs[1][0]
     ax_rg = axs[1][1]
     ax_md = axs[1][2]
+    ff_map = {
+        "0": {"bac": 125, "bnb": 70, "bmb": 80, "tors": 50},
+        "1": {"bac": 125, "bnb": 70, "bmb": 80, "tors": 0},
+        "2": {"bac": 125, "bnb": 70, "bmb": 90, "tors": 50},
+        "3": {"bac": 125, "bnb": 70, "bmb": 90, "tors": 0},
+        "4": {"bac": 125, "bnb": 90, "bmb": 80, "tors": 50},
+        "5": {"bac": 125, "bnb": 90, "bmb": 80, "tors": 0},
+        "6": {"bac": 125, "bnb": 90, "bmb": 90, "tors": 50},
+        "7": {"bac": 125, "bnb": 90, "bmb": 90, "tors": 0},
+        "8": {"bac": 125, "bnb": 120, "bmb": 80, "tors": 50},
+        "9": {"bac": 125, "bnb": 120, "bmb": 80, "tors": 0},
+        "10": {"bac": 125, "bnb": 120, "bmb": 90, "tors": 50},
+        "11": {"bac": 125, "bnb": 120, "bmb": 90, "tors": 0},
+        "12": {"bac": 135, "bnb": 70, "bmb": 80, "tors": 50},
+        "13": {"bac": 135, "bnb": 70, "bmb": 80, "tors": 0},
+        "14": {"bac": 135, "bnb": 70, "bmb": 90, "tors": 50},
+        "15": {"bac": 135, "bnb": 70, "bmb": 90, "tors": 0},
+        "16": {"bac": 135, "bnb": 90, "bmb": 80, "tors": 50},
+        "17": {"bac": 135, "bnb": 90, "bmb": 80, "tors": 0},
+        "18": {"bac": 135, "bnb": 90, "bmb": 90, "tors": 50},
+        "19": {"bac": 135, "bnb": 90, "bmb": 90, "tors": 0},
+        "20": {"bac": 135, "bnb": 120, "bmb": 80, "tors": 50},
+        "21": {"bac": 135, "bnb": 120, "bmb": 80, "tors": 0},
+        "22": {"bac": 135, "bnb": 120, "bmb": 90, "tors": 50},
+        "23": {"bac": 135, "bnb": 120, "bmb": 90, "tors": 0},
+        "24": {"bac": 160, "bnb": 70, "bmb": 80, "tors": 50},
+        "25": {"bac": 160, "bnb": 70, "bmb": 80, "tors": 0},
+        "26": {"bac": 160, "bnb": 70, "bmb": 90, "tors": 50},
+        "27": {"bac": 160, "bnb": 70, "bmb": 90, "tors": 0},
+        "28": {"bac": 160, "bnb": 90, "bmb": 80, "tors": 50},
+        "29": {"bac": 160, "bnb": 90, "bmb": 80, "tors": 0},
+        "30": {"bac": 160, "bnb": 90, "bmb": 90, "tors": 50},
+        "31": {"bac": 160, "bnb": 90, "bmb": 90, "tors": 0},
+        "32": {"bac": 160, "bnb": 120, "bmb": 80, "tors": 50},
+        "33": {"bac": 160, "bnb": 120, "bmb": 80, "tors": 0},
+        "34": {"bac": 160, "bnb": 120, "bmb": 90, "tors": 50},
+        "35": {"bac": 160, "bnb": 120, "bmb": 90, "tors": 0},
+        "36": {"bac": 175, "bnb": 70, "bmb": 80, "tors": 50},
+        "37": {"bac": 175, "bnb": 70, "bmb": 80, "tors": 0},
+        "38": {"bac": 175, "bnb": 70, "bmb": 90, "tors": 50},
+        "39": {"bac": 175, "bnb": 70, "bmb": 90, "tors": 0},
+        "40": {"bac": 175, "bnb": 90, "bmb": 80, "tors": 50},
+        "41": {"bac": 175, "bnb": 90, "bmb": 80, "tors": 0},
+        "42": {"bac": 175, "bnb": 90, "bmb": 90, "tors": 50},
+        "43": {"bac": 175, "bnb": 90, "bmb": 90, "tors": 0},
+        "44": {"bac": 175, "bnb": 120, "bmb": 80, "tors": 50},
+        "45": {"bac": 175, "bnb": 120, "bmb": 80, "tors": 0},
+        "46": {"bac": 175, "bnb": 120, "bmb": 90, "tors": 50},
+        "47": {"bac": 175, "bnb": 120, "bmb": 90, "tors": 0},
+    }
 
-    cage_map = {
-        "4P6_3C1nb_2C1ca_f0": "4P6_3C1n0200b0000_2C1c0000a0700_ton",
-        "4P6_3C1nb_2C1ca_f1": "4P6_3C1n0200b0000_2C1c0000a0700_toff",
-        "4P6_3C1nb_2C1ca_f2": "4P6_3C1n0400b0000_2C1c0000a0700_ton",
-        "4P6_3C1nb_2C1ca_f3": "4P6_3C1n0400b0000_2C1c0000a0700_toff",
-        "4P6_3C1nb_2C1ca_f4": "4P6_3C1n0700b0000_2C1c0000a0700_ton",
-        "4P6_3C1nb_2C1ca_f5": "4P6_3C1n0700b0000_2C1c0000a0700_toff",
-        "4P6_3C1nb_2C1ca_f6": "4P6_3C1n0200b0000_2C1c0000a01400_ton",
-        "4P6_3C1nb_2C1ca_f7": "4P6_3C1n0200b0000_2C1c0000a01400_toff",
-        "4P6_3C1nb_2C1ca_f8": "4P6_3C1n0400b0000_2C1c0000a01400_ton",
-        "4P6_3C1nb_2C1ca_f9": "4P6_3C1n0400b0000_2C1c0000a01400_toff",
-        "4P6_3C1nb_2C1ca_f10": "4P6_3C1n0700b0000_2C1c0000a01400_ton",
-        "4P6_3C1nb_2C1ca_f11": "4P6_3C1n0700b0000_2C1c0000a01400_toff",
-        "4P6_3C1nb_2C1ca_f12": "4P6_3C1n0200b0000_2C1c0000a01700_ton",
-        "4P6_3C1nb_2C1ca_f13": "4P6_3C1n0200b0000_2C1c0000a01700_toff",
-        "4P6_3C1nb_2C1ca_f14": "4P6_3C1n0400b0000_2C1c0000a01700_ton",
-        "4P6_3C1nb_2C1ca_f15": "4P6_3C1n0400b0000_2C1c0000a01700_toff",
-        "4P6_3C1nb_2C1ca_f16": "4P6_3C1n0700b0000_2C1c0000a01700_ton",
-        "4P6_3C1nb_2C1ca_f17": "4P6_3C1n0700b0000_2C1c0000a01700_toff",
+    bac_map = {
+        125: "2C1c0000a0700",
+        135: "2C1c0000a0900",
+        160: "2C1c0000a01400",
+        175: "2C1c0000a01700",
+    }
+    bnb_map = {
+        70: "3C1n0200b0000",
+        90: "3C1n0400b0000",
+        120: "3C1n0700b0000",
+    }
+    bmb_map = {
+        80: "4C1m0300b0000",
+        90: "4C1m0400b0000",
     }
 
     structure_comparisons = []
     old_cage_suffix = "_von_0"
     for i in cages:
-        old_cage = cage_map[i]
+        ff_name = i.split("_f")[1]
+        ff_values = ff_map[ff_name]
+        torsion = "ton" if ff_values["tors"] == 50 else "toff"
+        t_str = i.split("_")[0]
+        if "4P6" in i:
+            bb1name = bnb_map[ff_values["bnb"]]
+        elif "6P12" in i:
+            bb1name = bmb_map[ff_values["bmb"]]
+        bb2name = bac_map[ff_values["bac"]]
+        old_cage = f"{t_str}_{bb1name}_{bb2name}_{torsion}"
+        print(f"comparing {i} with {old_cage}")
+
+        if "4P6" in old_cage:
+            m = "o"
+        elif "6P12" in old_cage:
+            m = "D"
         if "ton" in old_cage:
             c = "r"
         elif "toff" in old_cage:
@@ -639,6 +894,7 @@ def main():
             e1,
             e2,
             c=c,
+            marker=m,
             edgecolor="none",
             s=100,
             alpha=1.0,
@@ -687,6 +943,7 @@ def main():
                     bd1,
                     bd2,
                     c=c,
+                    marker=m,
                     edgecolor="none",
                     s=100,
                     alpha=1.0,
@@ -704,6 +961,7 @@ def main():
                     bd1,
                     bd2,
                     c=c,
+                    marker=m,
                     edgecolor="none",
                     s=100,
                     alpha=1.0,
@@ -726,6 +984,7 @@ def main():
                     bd1,
                     bd2,
                     c=c,
+                    marker=m,
                     edgecolor="none",
                     s=100,
                     alpha=1.0,
@@ -739,6 +998,7 @@ def main():
             max_diameter1,
             max_diameter2,
             c=c,
+            marker=m,
             edgecolor="none",
             s=100,
             alpha=1.0,
@@ -752,6 +1012,7 @@ def main():
             radius_gyration1,
             radius_gyration2,
             c=c,
+            marker=m,
             edgecolor="none",
             s=100,
             alpha=1.0,
@@ -813,6 +1074,20 @@ def main():
                 markerfacecolor={"ton": "r", "toff": "gray"}[tstr],
                 markersize=7,
                 markeredgecolor="none",
+                alpha=1.0,
+            )
+        )
+    for tstr in {"4P6": "o", "6P12": "D"}:
+        legend_elements.append(
+            Line2D(
+                [0],
+                [0],
+                marker={"4P6": "o", "6P12": "D"}[tstr],
+                color="w",
+                label=tstr,
+                markerfacecolor="w",
+                markersize=7,
+                markeredgecolor="k",
                 alpha=1.0,
             )
         )

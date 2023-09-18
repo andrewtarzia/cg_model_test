@@ -266,7 +266,7 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
 
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "random_test.pdf"),
+        os.path.join(figure_output, "random_test.png"),
         dpi=720,
         bbox_inches="tight",
     )
@@ -384,7 +384,7 @@ def test1(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l1.pdf"),
+        os.path.join(figure_output, "l1.png"),
         dpi=720,
         bbox_inches="tight",
     )
@@ -535,7 +535,7 @@ def test2(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l2.pdf"),
+        os.path.join(figure_output, "l2.png"),
         dpi=720,
         bbox_inches="tight",
     )
@@ -663,7 +663,7 @@ def test3(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l3.pdf"),
+        os.path.join(figure_output, "l3.png"),
         dpi=720,
         bbox_inches="tight",
     )
@@ -799,7 +799,7 @@ def test4(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l4.pdf"),
+        os.path.join(figure_output, "l4.png"),
         dpi=720,
         bbox_inches="tight",
     )
@@ -878,7 +878,7 @@ def test5(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l5.pdf"),
+        os.path.join(figure_output, "l5.png"),
         dpi=720,
         bbox_inches="tight",
     )

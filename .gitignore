@@ -162,3 +162,5 @@ cython_debug/
 calculations
 structures
 ligands
+ommcalculations
+ommtest

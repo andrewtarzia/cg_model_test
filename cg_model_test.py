@@ -101,6 +101,18 @@ def optimise_cage(
 
     # Run optimisations of series of conformers with shifted out
     # building blocks.
+    for test_molecule in yield_shifted_models(conformer.molecule, force_field):
+        conformer = run_optimisation(
+            molecule=test_molecule,
+            name=name,
+            file_suffix="sopt",
+            output_dir=output_dir,
+            force_field=force_field,
+            # max_iterations=50,
+            platform=platform,
+        )
+        ensemble.add_conformer(conformer=conformer, source="shifted2")
+
     logging.info(f"optimisation of shifted structures of {name}")
     for test_molecule in yield_shifted_models(temp_molecule, force_field):
         conformer = run_optimisation(
@@ -112,7 +124,7 @@ def optimise_cage(
             # max_iterations=50,
             platform=platform,
         )
-        ensemble.add_conformer(conformer=conformer, source="shifted")
+        ensemble.add_conformer(conformer=conformer, source="shifted1")
 
     # Collect and optimise structures nearby in phase space.
     logging.info(f"optimisation of nearby structures of {name}")
@@ -589,230 +601,13 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
     return forcefieldlibrary
 
 
-def main():
-    first_line = f"Usage: {__file__}.py path "
-    if not len(sys.argv) == 2:
-        logging.info(f"{first_line}")
-        sys.exit()
-    else:
-        path = sys.argv[1]
-
-    prefix = "cg_model_test"
-
-    struct_output = pathlib.Path().absolute() / path / "structures"
-    check_directory(struct_output)
-    calculation_output = pathlib.Path().absolute() / path / "calculations"
-    check_directory(calculation_output)
-    ligand_output = pathlib.Path().absolute() / path / "ligands"
-    check_directory(ligand_output)
-
-    struct_done = pathlib.Path().absolute() / path / "structures_done"
-    calculation_done = pathlib.Path().absolute() / path / "calculations_done"
-
-    # Define bead libraries.
-    core_bead = CgBead(
-        element_string="Ag",
-        bead_class="c",
-        bead_type="c1",
-        coordination=2,
-    )
-    arm_bead = CgBead(
-        element_string="Ba",
-        bead_class="a",
-        bead_type="a1",
-        coordination=2,
-    )
-    binder_bead = CgBead(
-        element_string="Pb",
-        bead_class="b",
-        bead_type="b1",
-        coordination=2,
-    )
-    trigonal_bead = CgBead(
-        element_string="C",
-        bead_class="n",
-        bead_type="n1",
-        coordination=3,
-    )
-    tetragonal_bead = CgBead(
-        element_string="Pd",
-        bead_class="m",
-        bead_type="m1",
-        coordination=4,
-    )
-    full_bead_library = (
-        core_bead,
-        arm_bead,
-        binder_bead,
-        trigonal_bead,
-        tetragonal_bead,
-    )
-    bead_library_check(full_bead_library)
-
-    logging.info(f"defining force field for {prefix}")
-    forcefieldlibrary = define_forcefield_library(
-        full_bead_library=full_bead_library,
-        calculation_output=calculation_output,
-        prefix=prefix,
-    )
-
-    logging.info("defining building blocks")
-    ditopic = TwoC1Arm(bead=core_bead, abead1=arm_bead)
-    tritopic = ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
-    tetratopic = FourC1Arm(bead=tetragonal_bead, abead1=binder_bead)
-
-    # Define list of topology functions.
-    cage_2p3_topologies = {"4P6": stk.cage.FourPlusSix}
-    cage_2p4_topologies = {"6P12": stk.cage.M6L12Cube}
-
-    populations = {
-        "2p4": {
-            "topologies": cage_2p4_topologies,
-            "c2": ditopic,
-            "cl": tetratopic,
-        },
-        "2p3": {
-            "topologies": cage_2p3_topologies,
-            "c2": ditopic,
-            "cl": tritopic,
-        },
-    }
-
-    cages = []
-    for population in populations:
-        logging.info(f"running population {population}")
-        popn_dict = populations[population]
-        popn_iterator = itertools.product(
-            popn_dict["topologies"],
-            tuple(
-                forcefieldlibrary.yield_forcefields(
-                    prefix=prefix, output_path=calculation_output
-                )
-            ),
-        )
-        for cage_topo_str, force_field in popn_iterator:
-            c2_precursor = popn_dict["c2"]
-            cl_precursor = popn_dict["cl"]
-            name = (
-                f"{cage_topo_str}_{cl_precursor.get_name()}_"
-                f"{c2_precursor.get_name()}_"
-                f"f{force_field.get_identifier()}"
-            )
-
-            # Optimise building blocks.
-            c2_name = (
-                f"{c2_precursor.get_name()}_f{force_field.get_identifier()}"
-            )
-            c2_building_block = optimise_ligand(
-                molecule=c2_precursor.get_building_block(),
-                name=c2_name,
-                output_dir=calculation_output,
-                force_field=force_field,
-                platform="CPU",
-            )
-            c2_building_block.write(str(ligand_output / f"{c2_name}_optl.mol"))
-
-            cl_name = (
-                f"{cl_precursor.get_name()}_f{force_field.get_identifier()}"
-            )
-            cl_building_block = optimise_ligand(
-                molecule=cl_precursor.get_building_block(),
-                name=cl_name,
-                output_dir=calculation_output,
-                force_field=force_field,
-                platform="CPU",
-            )
-            cl_building_block.write(str(ligand_output / f"{cl_name}_optl.mol"))
-
-            logging.info(f"building {name}")
-            cage = stk.ConstructedMolecule(
-                topology_graph=popn_dict["topologies"][cage_topo_str](
-                    building_blocks=(c2_building_block, cl_building_block),
-                ),
-            )
-
-            conformer = optimise_cage(
-                molecule=cage,
-                name=name,
-                output_dir=calculation_output,
-                force_field=force_field,
-                # platform="CPU",
-                # platform="CUDA",
-                platform=None,
-            )
-            if conformer is not None:
-                conformer.molecule.write(
-                    str(struct_output / f"{name}_optc.mol")
-                )
-
-            cages.append(name)
-
-    with open(calculation_output / f"{prefix}_iterations.json", "r") as f:
-        iterations = json.load(f)
-
-    bonds_set = (
-        "TargetBond(class1='a', class2='c', eclass1='Ba', eclass2='Ag', "
-        "bond_r=Quantity(value=1.5, unit=angstrom), bond_k=Quantity(valu"
-        "e=100000.0, unit=kilojoule/(nanometer**2*mole)));     TargetBon"
-        "d(class1='a', class2='b', eclass1='Ba', eclass2='Pb', bond_r=Qu"
-        "antity(value=1.0, unit=angstrom), bond_k=Quantity(value=100000."
-        "0, unit=kilojoule/(nanometer**2*mole)));     TargetBond(class1="
-        "'b', class2='n', eclass1='Pb', eclass2='C', bond_r=Quantity(val"
-        "ue=1.5, unit=angstrom), bond_k=Quantity(value=100000.0, unit=ki"
-        "lojoule/(nanometer**2*mole)));     TargetBond(class1='b', class"
-        "2='m', eclass1='Pb', eclass2='Pd', bond_r=Quantity(value=1.5, u"
-        "nit=angstrom), bond_k=Quantity(value=100000.0, unit=kilojoule/("
-        "nanometer**2*mole)))"
-    )
-    nonbondeds_set = (
-        "TargetNonbonded(bead_class='a', bead_element='Ba', sigma=Quanti"
-        "ty(value=1.0, unit=angstrom), epsilon=Quantity(value=10.0, unit"
-        "=kilojoule/mole));     TargetNonbonded(bead_class='c', bead_ele"
-        "ment='Ag', sigma=Quantity(value=1.0, unit=angstrom), epsilon=Qu"
-        "antity(value=10.0, unit=kilojoule/mole));     TargetNonbonded(b"
-        "ead_class='n', bead_element='C', sigma=Quantity(value=1.0, unit"
-        "=angstrom), epsilon=Quantity(value=10.0, unit=kilojoule/mole));"
-        "     TargetNonbonded(bead_class='m', bead_element='Pb', sigma=Q"
-        "uantity(value=1.0, unit=angstrom), epsilon=Quantity(value=10.0,"
-        " unit=kilojoule/mole));     TargetNonbonded(bead_class='b', bea"
-        "d_element='Pb', sigma=Quantity(value=1.0, unit=angstrom), epsil"
-        "on=Quantity(value=10.0, unit=kilojoule/mole))"
-    )
-    torsions_set = ""
-    bac_string = "1='b', 2='a', 3='c'"
-    bnb_string = "1='b', 2='n', 3='b'"
-    bmb_string = "1='b', 2='m', 3='b'"
-    for ite in iterations:
-        dic = iterations[ite]
-        if dic["bonds"] != bonds_set:
-            raise ValueError("bonds does not match set")
-        if dic["nonbondeds"] != nonbondeds_set:
-            raise ValueError("nonbondeds does not match set")
-        if dic["torsions"] != torsions_set:
-            raise ValueError("torsions does not match set")
-
-        for angle in dic["angles"].split("TargetAngle"):
-            split_str = "".join(angle.split("class"))
-            if bac_string in split_str:
-                bac_value = split_str.split("value=")[1].split(", unit")[0]
-            if bnb_string in split_str:
-                bnb_value = split_str.split("value=")[1].split(", unit")[0]
-
-        for angle in dic["custom_angles"].split("TargetPyramidAngle"):
-            split_str = "".join(angle.split("class"))
-            if bmb_string in split_str:
-                bmb_value = split_str.split("value=")[1].split(", unit")[0]
-
-        for torsion in dic["custom_torsions"].split("TargetTorsion"):
-            if "torsion_k" in torsion:
-                split_str = "".join(torsion.split("torsion_k")[1])
-                torsion_value = split_str.split("value=")[1].split(", unit")[0]
-
-        print(
-            f"{ite}, bac: {bac_value}, bnb: {bnb_value}, "
-            f"bmb: {bmb_value}, tors: {torsion_value}"
-        )
-
+def analysis(
+    cages,
+    struct_output,
+    struct_done,
+    calculation_output,
+    calculation_done,
+):
     fig, axs = plt.subplots(ncols=3, nrows=2, figsize=(16, 8))
 
     ax = axs[0][0]
@@ -822,54 +617,36 @@ def main():
     ax_rg = axs[1][1]
     ax_md = axs[1][2]
     ff_map = {
-        "0": {"bac": 125, "bnb": 70, "bmb": 80, "tors": 50},
-        "1": {"bac": 125, "bnb": 70, "bmb": 80, "tors": 0},
-        "2": {"bac": 125, "bnb": 70, "bmb": 90, "tors": 50},
-        "3": {"bac": 125, "bnb": 70, "bmb": 90, "tors": 0},
-        "4": {"bac": 125, "bnb": 90, "bmb": 80, "tors": 50},
-        "5": {"bac": 125, "bnb": 90, "bmb": 80, "tors": 0},
-        "6": {"bac": 125, "bnb": 90, "bmb": 90, "tors": 50},
-        "7": {"bac": 125, "bnb": 90, "bmb": 90, "tors": 0},
-        "8": {"bac": 125, "bnb": 120, "bmb": 80, "tors": 50},
-        "9": {"bac": 125, "bnb": 120, "bmb": 80, "tors": 0},
-        "10": {"bac": 125, "bnb": 120, "bmb": 90, "tors": 50},
-        "11": {"bac": 125, "bnb": 120, "bmb": 90, "tors": 0},
-        "12": {"bac": 135, "bnb": 70, "bmb": 80, "tors": 50},
-        "13": {"bac": 135, "bnb": 70, "bmb": 80, "tors": 0},
-        "14": {"bac": 135, "bnb": 70, "bmb": 90, "tors": 50},
-        "15": {"bac": 135, "bnb": 70, "bmb": 90, "tors": 0},
-        "16": {"bac": 135, "bnb": 90, "bmb": 80, "tors": 50},
-        "17": {"bac": 135, "bnb": 90, "bmb": 80, "tors": 0},
-        "18": {"bac": 135, "bnb": 90, "bmb": 90, "tors": 50},
-        "19": {"bac": 135, "bnb": 90, "bmb": 90, "tors": 0},
-        "20": {"bac": 135, "bnb": 120, "bmb": 80, "tors": 50},
-        "21": {"bac": 135, "bnb": 120, "bmb": 80, "tors": 0},
-        "22": {"bac": 135, "bnb": 120, "bmb": 90, "tors": 50},
-        "23": {"bac": 135, "bnb": 120, "bmb": 90, "tors": 0},
-        "24": {"bac": 160, "bnb": 70, "bmb": 80, "tors": 50},
-        "25": {"bac": 160, "bnb": 70, "bmb": 80, "tors": 0},
-        "26": {"bac": 160, "bnb": 70, "bmb": 90, "tors": 50},
-        "27": {"bac": 160, "bnb": 70, "bmb": 90, "tors": 0},
-        "28": {"bac": 160, "bnb": 90, "bmb": 80, "tors": 50},
-        "29": {"bac": 160, "bnb": 90, "bmb": 80, "tors": 0},
-        "30": {"bac": 160, "bnb": 90, "bmb": 90, "tors": 50},
-        "31": {"bac": 160, "bnb": 90, "bmb": 90, "tors": 0},
-        "32": {"bac": 160, "bnb": 120, "bmb": 80, "tors": 50},
-        "33": {"bac": 160, "bnb": 120, "bmb": 80, "tors": 0},
-        "34": {"bac": 160, "bnb": 120, "bmb": 90, "tors": 50},
-        "35": {"bac": 160, "bnb": 120, "bmb": 90, "tors": 0},
-        "36": {"bac": 175, "bnb": 70, "bmb": 80, "tors": 50},
-        "37": {"bac": 175, "bnb": 70, "bmb": 80, "tors": 0},
-        "38": {"bac": 175, "bnb": 70, "bmb": 90, "tors": 50},
-        "39": {"bac": 175, "bnb": 70, "bmb": 90, "tors": 0},
-        "40": {"bac": 175, "bnb": 90, "bmb": 80, "tors": 50},
-        "41": {"bac": 175, "bnb": 90, "bmb": 80, "tors": 0},
-        "42": {"bac": 175, "bnb": 90, "bmb": 90, "tors": 50},
-        "43": {"bac": 175, "bnb": 90, "bmb": 90, "tors": 0},
-        "44": {"bac": 175, "bnb": 120, "bmb": 80, "tors": 50},
-        "45": {"bac": 175, "bnb": 120, "bmb": 80, "tors": 0},
-        "46": {"bac": 175, "bnb": 120, "bmb": 90, "tors": 50},
-        "47": {"bac": 175, "bnb": 120, "bmb": 90, "tors": 0},
+        "2p3": {
+            "0": {"bac": 125, "bnb": 70, "tors": 50},
+            "1": {"bac": 125, "bnb": 70, "tors": 0},
+            "2": {"bac": 125, "bnb": 90, "tors": 50},
+            "3": {"bac": 125, "bnb": 90, "tors": 0},
+            "4": {"bac": 125, "bnb": 120, "tors": 50},
+            "5": {"bac": 125, "bnb": 120, "tors": 0},
+            "6": {"bac": 160, "bnb": 70, "tors": 50},
+            "7": {"bac": 160, "bnb": 70, "tors": 0},
+            "8": {"bac": 160, "bnb": 90, "tors": 50},
+            "9": {"bac": 160, "bnb": 90, "tors": 0},
+            "10": {"bac": 160, "bnb": 120, "tors": 50},
+            "11": {"bac": 160, "bnb": 120, "tors": 0},
+            "12": {"bac": 175, "bnb": 70, "tors": 50},
+            "13": {"bac": 175, "bnb": 70, "tors": 0},
+            "14": {"bac": 175, "bnb": 90, "tors": 50},
+            "15": {"bac": 175, "bnb": 90, "tors": 0},
+            "16": {"bac": 175, "bnb": 120, "tors": 50},
+            "17": {"bac": 175, "bnb": 120, "tors": 0},
+        },
+        "2p4": {
+            "0": {"bac": 135, "bmb": 80, "tors": 50},
+            "1": {"bac": 135, "bmb": 80, "tors": 0},
+            "2": {"bac": 135, "bmb": 90, "tors": 50},
+            "3": {"bac": 135, "bmb": 90, "tors": 0},
+            "4": {"bac": 160, "bmb": 80, "tors": 50},
+            "5": {"bac": 160, "bmb": 80, "tors": 0},
+            "6": {"bac": 160, "bmb": 90, "tors": 50},
+            "7": {"bac": 160, "bmb": 90, "tors": 0},
+        },
     }
 
     bac_map = {
@@ -888,29 +665,35 @@ def main():
         90: "4C1m0400b0000",
     }
 
+    alpha = 1.0
+    m = "o"
+
     structure_comparisons = []
     old_cage_suffix = "_von_0"
-    for i in cages:
-        ff_name = i.split("_f")[1]
-        ff_values = ff_map[ff_name]
-        torsion = "ton" if ff_values["tors"] == 50 else "toff"
-        t_str = i.split("_")[0]
-        if "4P6" in i:
+    for cage_name in cages:
+        ff_name = cage_name.split("_f")[1]
+        t_str = cage_name.split("_")[0]
+        if "4P6" in cage_name:
+            ff_values = ff_map["2p3"][ff_name]
             bb1name = bnb_map[ff_values["bnb"]]
-        elif "6P12" in i:
+        elif "6P12" in cage_name:
+            ff_values = ff_map["2p4"][ff_name]
             bb1name = bmb_map[ff_values["bmb"]]
+        torsion = "ton" if ff_values["tors"] == 50 else "toff"
         bb2name = bac_map[ff_values["bac"]]
         old_cage = f"{t_str}_{bb1name}_{bb2name}_{torsion}"
-        print(f"comparing {i} with {old_cage}")
+        print(f"comparing {cage_name} with {old_cage}")
 
         if "4P6" in old_cage:
-            m = "o"
+            if "ton" in old_cage:
+                c = "r"
+            elif "toff" in old_cage:
+                c = "gray"
         elif "6P12" in old_cage:
-            m = "D"
-        if "ton" in old_cage:
-            c = "r"
-        elif "toff" in old_cage:
-            c = "gray"
+            if "ton" in old_cage:
+                c = "skyblue"
+            elif "toff" in old_cage:
+                c = "gold"
 
         # compare_final_energies(
         #     path1=calculation_done / f"{old}_opt1_omm.out",
@@ -920,7 +703,7 @@ def main():
             path1=(
                 calculation_done / f"{old_cage}{old_cage_suffix}_ensemble.json"
             ),
-            path2=calculation_output / f"{i}_ensemble.json",
+            path2=calculation_output / f"{cage_name}_ensemble.json",
         )
 
         ax.scatter(
@@ -930,17 +713,17 @@ def main():
             marker=m,
             edgecolor="none",
             s=100,
-            alpha=1.0,
+            alpha=alpha,
         )
 
         new_struct = stk.BuildingBlock.init_from_file(
-            str(struct_output / f"{i}_optc.mol")
+            str(struct_output / f"{cage_name}_optc.mol")
         )
         old_struct = stk.BuildingBlock.init_from_file(
             str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")
         )
         structure_comparisons.append(
-            f'{str(struct_output / f"{i}_optc.mol")} '
+            f'{str(struct_output / f"{cage_name}_optc.mol")} '
             f'{str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")}'
         )
 
@@ -970,7 +753,7 @@ def main():
             assert i in bond_data2
             assert len(bond_data1[i]) == len(bond_data2[i])
             for bd1, bd2 in zip(bond_data1[i], bond_data2[i]):
-                # print(bd1, bd2)
+                # print("bonds", bd1, bd2, abs(bd1 - bd2))
                 # assert np.isclose(bd1, bd2, atol=1e-1, rtol=0)
                 ax_bond.scatter(
                     bd1,
@@ -979,7 +762,7 @@ def main():
                     marker=m,
                     edgecolor="none",
                     s=100,
-                    alpha=1.0,
+                    alpha=alpha,
                 )
 
         angle_data1 = g_measure.calculate_angles(old_struct)
@@ -988,8 +771,16 @@ def main():
             assert i in angle_data2
             assert len(angle_data1[i]) == len(angle_data2[i])
             for bd1, bd2 in zip(angle_data1[i], angle_data2[i]):
-                # print(bd1, bd2)
+                # print(
+                #     "angles",
+                #     round(bd1, 2),
+                #     round(bd2, 2),
+                #     round(abs(bd1 - bd2), 2),
+                #     round((1 / 2) * 1e2 * (bd1 - bd2) ** 2, 2),
+                # )
                 # assert np.isclose(bd1, bd2, atol=1, rtol=0)
+                if not np.isclose(bd1, bd2, atol=1, rtol=0):
+                    print("angles", round(bd1, 2), round(bd2, 2))
                 ax_angle.scatter(
                     bd1,
                     bd2,
@@ -997,7 +788,7 @@ def main():
                     marker=m,
                     edgecolor="none",
                     s=100,
-                    alpha=1.0,
+                    alpha=alpha,
                 )
 
         dihedral_data1 = g_measure.calculate_torsions(
@@ -1013,6 +804,8 @@ def main():
             assert len(dihedral_data1[i]) == len(dihedral_data2[i])
             for bd1, bd2 in zip(dihedral_data1[i], dihedral_data2[i]):
                 # assert np.isclose(bd1, bd2, atol=1, rtol=0)
+                if not np.isclose(bd1, bd2, atol=1, rtol=0):
+                    print("torsions", round(bd1, 2), round(bd2, 2))
                 ax_tors.scatter(
                     bd1,
                     bd2,
@@ -1020,12 +813,11 @@ def main():
                     marker=m,
                     edgecolor="none",
                     s=100,
-                    alpha=1.0,
+                    alpha=alpha,
                 )
 
         max_diameter1 = g_measure.calculate_max_diameter(old_struct)
         max_diameter2 = g_measure.calculate_max_diameter(new_struct)
-        # print(max_diameter1, max_diameter2)
         # assert np.isclose(bd1, bd2, atol=1, rtol=0)
         ax_md.scatter(
             max_diameter1,
@@ -1034,12 +826,11 @@ def main():
             marker=m,
             edgecolor="none",
             s=100,
-            alpha=1.0,
+            alpha=alpha,
         )
 
         radius_gyration1 = g_measure.calculate_radius_gyration(old_struct)
         radius_gyration2 = g_measure.calculate_radius_gyration(new_struct)
-        # print(radius_gyration1, radius_gyration2)
         # assert np.isclose(bd1, bd2, atol=1, rtol=0)
         ax_rg.scatter(
             radius_gyration1,
@@ -1048,7 +839,7 @@ def main():
             marker=m,
             edgecolor="none",
             s=100,
-            alpha=1.0,
+            alpha=alpha,
         )
 
     ax.tick_params(axis="both", which="major", labelsize=16)
@@ -1096,32 +887,24 @@ def main():
     ax_md.plot([5, 15], [5, 15], c="k", ls="--")
 
     legend_elements = []
-    for tstr in {"ton": "r", "toff": "gray"}:
+    cmap = {
+        ("4P6", "ton"): "r",
+        ("4P6", "toff"): "gray",
+        ("6P12", "ton"): "skyblue",
+        ("6P12", "toff"): "gold",
+    }
+    for tstr, tors in cmap:
         legend_elements.append(
             Line2D(
                 [0],
                 [0],
-                marker="o",
+                marker=m,
                 color="w",
-                label=tstr,
-                markerfacecolor={"ton": "r", "toff": "gray"}[tstr],
+                label=f"{tstr},{tors}",
+                markerfacecolor=cmap[(tstr, tors)],
                 markersize=7,
                 markeredgecolor="none",
-                alpha=1.0,
-            )
-        )
-    for tstr in {"4P6": "o", "6P12": "D"}:
-        legend_elements.append(
-            Line2D(
-                [0],
-                [0],
-                marker={"4P6": "o", "6P12": "D"}[tstr],
-                color="w",
-                label=tstr,
-                markerfacecolor="w",
-                markersize=7,
-                markeredgecolor="k",
-                alpha=1.0,
+                alpha=alpha,
             )
         )
     ax.legend(handles=legend_elements, fontsize=16, ncol=1)
@@ -1134,7 +917,179 @@ def main():
     )
     plt.close()
 
-    print("\n".join(structure_comparisons))
+
+def main():
+    first_line = f"Usage: {__file__}.py path "
+    if not len(sys.argv) == 2:
+        logging.info(f"{first_line}")
+        sys.exit()
+    else:
+        path = sys.argv[1]
+
+    prefix = "cg_model_test"
+
+    struct_output = pathlib.Path().absolute() / path / "structures"
+    check_directory(struct_output)
+    calculation_output = pathlib.Path().absolute() / path / "calculations"
+    check_directory(calculation_output)
+    ligand_output = pathlib.Path().absolute() / path / "ligands"
+    check_directory(ligand_output)
+
+    struct_done = pathlib.Path().absolute() / path / "old_structures"
+    calculation_done = pathlib.Path().absolute() / path / "old_calculations"
+
+    # Define bead libraries.
+    core_bead = CgBead(
+        element_string="Ag",
+        bead_class="c",
+        bead_type="c1",
+        coordination=2,
+    )
+    arm_bead = CgBead(
+        element_string="Ba",
+        bead_class="a",
+        bead_type="a1",
+        coordination=2,
+    )
+    binder_bead = CgBead(
+        element_string="Pb",
+        bead_class="b",
+        bead_type="b1",
+        coordination=2,
+    )
+    trigonal_bead = CgBead(
+        element_string="C",
+        bead_class="n",
+        bead_type="n1",
+        coordination=3,
+    )
+    tetragonal_bead = CgBead(
+        element_string="Pd",
+        bead_class="m",
+        bead_type="m1",
+        coordination=4,
+    )
+    full_bead_library = (
+        core_bead,
+        arm_bead,
+        binder_bead,
+        trigonal_bead,
+        tetragonal_bead,
+    )
+    bead_library_check(full_bead_library)
+
+    logging.info(f"defining force field for {prefix}")
+    forcefieldlibrary_2p3 = define_forcefield_library(
+        full_bead_library=full_bead_library,
+        calculation_output=calculation_output,
+        prefix=prefix + "_2p3",
+    )
+    forcefieldlibrary_2p4 = define_forcefield_library(
+        full_bead_library=full_bead_library,
+        calculation_output=calculation_output,
+        prefix=prefix + "_2p4",
+    )
+
+    logging.info("defining building blocks")
+    ditopic = TwoC1Arm(bead=core_bead, abead1=arm_bead)
+    tritopic = ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
+    tetratopic = FourC1Arm(bead=tetragonal_bead, abead1=binder_bead)
+
+    # Define list of topology functions.
+    cage_2p3_topologies = {"4P6": stk.cage.FourPlusSix}
+    cage_2p4_topologies = {"6P12": stk.cage.M6L12Cube}
+
+    populations = {
+        "2p4": {
+            "topologies": cage_2p4_topologies,
+            "c2": ditopic,
+            "cl": tetratopic,
+            "fflibrary": forcefieldlibrary_2p4,
+        },
+        "2p3": {
+            "topologies": cage_2p3_topologies,
+            "c2": ditopic,
+            "cl": tritopic,
+            "fflibrary": forcefieldlibrary_2p3,
+        },
+    }
+
+    cages = []
+    for population in populations:
+        logging.info(f"running population {population}")
+        popn_dict = populations[population]
+        popn_iterator = itertools.product(
+            popn_dict["topologies"],
+            tuple(
+                popn_dict["fflibrary"].yield_forcefields(
+                    output_path=calculation_output
+                )
+            ),
+        )
+        for cage_topo_str, force_field in popn_iterator:
+            c2_precursor = popn_dict["c2"]
+            cl_precursor = popn_dict["cl"]
+            name = (
+                f"{cage_topo_str}_{cl_precursor.get_name()}_"
+                f"{c2_precursor.get_name()}_"
+                f"f{force_field.get_identifier()}"
+            )
+
+            # Optimise building blocks.
+            c2_name = (
+                f"{c2_precursor.get_name()}_f{force_field.get_identifier()}"
+            )
+            c2_building_block = optimise_ligand(
+                molecule=c2_precursor.get_building_block(),
+                name=c2_name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                platform=None,
+            )
+            c2_building_block.write(str(ligand_output / f"{c2_name}_optl.mol"))
+
+            cl_name = (
+                f"{cl_precursor.get_name()}_f{force_field.get_identifier()}"
+            )
+            cl_building_block = optimise_ligand(
+                molecule=cl_precursor.get_building_block(),
+                name=cl_name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                platform=None,
+            )
+            cl_building_block.write(str(ligand_output / f"{cl_name}_optl.mol"))
+
+            logging.info(f"building {name}")
+            cage = stk.ConstructedMolecule(
+                topology_graph=popn_dict["topologies"][cage_topo_str](
+                    building_blocks=(c2_building_block, cl_building_block),
+                ),
+            )
+
+            conformer = optimise_cage(
+                molecule=cage,
+                name=name,
+                output_dir=calculation_output,
+                force_field=force_field,
+                # platform="CPU",
+                # platform="CUDA",
+                platform=None,
+            )
+            if conformer is not None:
+                conformer.molecule.write(
+                    str(struct_output / f"{name}_optc.mol")
+                )
+
+            cages.append(name)
+
+    analysis(
+        cages=cages,
+        struct_output=struct_output,
+        struct_done=struct_done,
+        calculation_output=calculation_output,
+        calculation_done=calculation_done,
+    )
 
 
 if __name__ == "__main__":

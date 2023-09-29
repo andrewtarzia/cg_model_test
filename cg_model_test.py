@@ -219,17 +219,21 @@ def compare_final_energies(path1, path2):
         e2 = get_final_energy(path2)
         # print(path1.name, path2.name, e1, e2)
         # assert np.isclose(e1, e2, atol=1e-2, rtol=0)
-        return e1, e2
+
     elif ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        print("    ", path1.name, path2.name, e1, e2, id1, id2)
-        try:
-            assert np.isclose(e1, e2, atol=1e-1, rtol=0)
-        except AssertionError:
-            assert e1 > 5 and e2 > 5
+        # print("    ", path1.name, path2.name, e1, e2, id1, id2)
         # assert id1 == id2
-        return e1, e2
+    try:
+        assert np.isclose(e1, e2, atol=1e-1, rtol=0)
+    except AssertionError:
+        # assert e1 > 5 and e2 > 5
+        print("!!!!!!!!!!!!!!!!")
+        print(e1, id1, e2, id2)
+        print(path1.name, path2.name)
+        print("!!!!!!!!!!!!!!!!")
+    return e1, e2
 
 
 def define_forcefield_library(full_bead_library, calculation_output, prefix):

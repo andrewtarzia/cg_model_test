@@ -240,6 +240,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
     forcefieldlibrary = ForceFieldLibrary(
         bead_library=full_bead_library,
         vdw_bond_cutoff=2,
+        prefix=prefix,
     )
     forcefieldlibrary.add_bond_range(
         TargetBondRange(
@@ -279,44 +280,46 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             ),
         )
     )
-    forcefieldlibrary.add_bond_range(
-        TargetBondRange(
-            class1="b",
-            class2="n",
-            eclass1="Pb",
-            eclass2="C",
-            bond_rs=(
-                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
-            ),
-            bond_ks=(
-                openmm.unit.Quantity(
-                    value=1e5,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.nanometer**2,
+    if "2p3" in prefix:
+        forcefieldlibrary.add_bond_range(
+            TargetBondRange(
+                class1="b",
+                class2="n",
+                eclass1="Pb",
+                eclass2="C",
+                bond_rs=(
+                    openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
                 ),
-            ),
-        )
-    )
-    forcefieldlibrary.add_bond_range(
-        TargetBondRange(
-            class1="b",
-            class2="m",
-            eclass1="Pb",
-            eclass2="Pd",
-            bond_rs=(
-                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
-            ),
-            bond_ks=(
-                openmm.unit.Quantity(
-                    value=1e5,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.nanometer**2,
+                bond_ks=(
+                    openmm.unit.Quantity(
+                        value=1e5,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.nanometer**2,
+                    ),
                 ),
-            ),
+            )
         )
-    )
+    elif "2p4" in prefix:
+        forcefieldlibrary.add_bond_range(
+            TargetBondRange(
+                class1="b",
+                class2="m",
+                eclass1="Pb",
+                eclass2="Pd",
+                bond_rs=(
+                    openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
+                ),
+                bond_ks=(
+                    openmm.unit.Quantity(
+                        value=1e5,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.nanometer**2,
+                    ),
+                ),
+            )
+        )
 
     forcefieldlibrary.add_angle_range(
         TargetAngleRange(
@@ -339,117 +342,142 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             ),
         )
     )
-    forcefieldlibrary.add_angle_range(
-        TargetAngleRange(
-            class1="b",
-            class2="a",
-            class3="c",
-            eclass1="Pb",
-            eclass2="Ba",
-            eclass3="Ag",
-            angles=(
-                openmm.unit.Quantity(value=125, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=135, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=175, unit=openmm.unit.degrees),
-            ),
-            angle_ks=(
-                openmm.unit.Quantity(
-                    value=1e2,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.radian**2,
+    if "2p3" in prefix:
+        forcefieldlibrary.add_angle_range(
+            TargetAngleRange(
+                class1="b",
+                class2="a",
+                class3="c",
+                eclass1="Pb",
+                eclass2="Ba",
+                eclass3="Ag",
+                angles=(
+                    openmm.unit.Quantity(value=125, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=175, unit=openmm.unit.degrees),
                 ),
-            ),
-        )
-    )
-    forcefieldlibrary.add_angle_range(
-        TargetAngleRange(
-            class1="n",
-            class2="b",
-            class3="a",
-            eclass1="C",
-            eclass2="Pb",
-            eclass3="Ba",
-            angles=(
-                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
-            ),
-            angle_ks=(
-                openmm.unit.Quantity(
-                    value=1e2,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.radian**2,
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
                 ),
-            ),
+            )
         )
-    )
-    forcefieldlibrary.add_angle_range(
-        TargetAngleRange(
-            class1="m",
-            class2="b",
-            class3="a",
-            eclass1="Pd",
-            eclass2="Pb",
-            eclass3="Ba",
-            angles=(
-                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
-            ),
-            angle_ks=(
-                openmm.unit.Quantity(
-                    value=1e2,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.radian**2,
+    elif "2p4" in prefix:
+        forcefieldlibrary.add_angle_range(
+            TargetAngleRange(
+                class1="b",
+                class2="a",
+                class3="c",
+                eclass1="Pb",
+                eclass2="Ba",
+                eclass3="Ag",
+                angles=(
+                    openmm.unit.Quantity(value=135, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
                 ),
-            ),
-        )
-    )
-    forcefieldlibrary.add_angle_range(
-        TargetAngleRange(
-            class1="b",
-            class2="n",
-            class3="b",
-            eclass1="Pb",
-            eclass2="C",
-            eclass3="Pb",
-            angles=(
-                openmm.unit.Quantity(value=70, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=120, unit=openmm.unit.degrees),
-            ),
-            angle_ks=(
-                openmm.unit.Quantity(
-                    value=1e2,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.radian**2,
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
                 ),
-            ),
+            )
         )
-    )
-    forcefieldlibrary.add_angle_range(
-        PyramidAngleRange(
-            class1="b",
-            class2="m",
-            class3="b",
-            eclass1="Pd",
-            eclass2="Pb",
-            eclass3="Pd",
-            angles=(
-                openmm.unit.Quantity(value=80, unit=openmm.unit.degrees),
-                openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
-            ),
-            angle_ks=(
-                openmm.unit.Quantity(
-                    value=1e2,
-                    unit=openmm.unit.kilojoule
-                    / openmm.unit.mole
-                    / openmm.unit.radian**2,
+    if "2p3" in prefix:
+        forcefieldlibrary.add_angle_range(
+            TargetAngleRange(
+                class1="n",
+                class2="b",
+                class3="a",
+                eclass1="C",
+                eclass2="Pb",
+                eclass3="Ba",
+                angles=(
+                    openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
                 ),
-            ),
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
+                ),
+            )
         )
-    )
+        forcefieldlibrary.add_angle_range(
+            TargetAngleRange(
+                class1="b",
+                class2="n",
+                class3="b",
+                eclass1="Pb",
+                eclass2="C",
+                eclass3="Pb",
+                angles=(
+                    openmm.unit.Quantity(value=70, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=120, unit=openmm.unit.degrees),
+                ),
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
+                ),
+            )
+        )
+    elif "2p4" in prefix:
+        forcefieldlibrary.add_angle_range(
+            TargetAngleRange(
+                class1="m",
+                class2="b",
+                class3="a",
+                eclass1="Pd",
+                eclass2="Pb",
+                eclass3="Ba",
+                angles=(
+                    openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
+                ),
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
+                ),
+            )
+        )
+        forcefieldlibrary.add_angle_range(
+            PyramidAngleRange(
+                class1="b",
+                class2="m",
+                class3="b",
+                eclass1="Pd",
+                eclass2="Pb",
+                eclass3="Pd",
+                angles=(
+                    openmm.unit.Quantity(value=80, unit=openmm.unit.degrees),
+                    openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
+                ),
+                angle_ks=(
+                    openmm.unit.Quantity(
+                        value=1e2,
+                        unit=openmm.unit.kilojoule
+                        / openmm.unit.mole
+                        / openmm.unit.radian**2,
+                    ),
+                ),
+            )
+        )
 
     forcefieldlibrary.add_torsion_range(
         TargetTorsionRange(
@@ -501,36 +529,39 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             ),
         )
     )
-    forcefieldlibrary.add_nonbonded_range(
-        TargetNonbondedRange(
-            bead_class="n",
-            bead_element="C",
-            epsilons=(
-                openmm.unit.Quantity(
-                    value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+    if "2p3" in prefix:
+        forcefieldlibrary.add_nonbonded_range(
+            TargetNonbondedRange(
+                bead_class="n",
+                bead_element="C",
+                epsilons=(
+                    openmm.unit.Quantity(
+                        value=10.0,
+                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    ),
                 ),
-            ),
-            sigmas=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
-        )
-    )
-    forcefieldlibrary.add_nonbonded_range(
-        TargetNonbondedRange(
-            bead_class="m",
-            bead_element="Pb",
-            epsilons=(
-                openmm.unit.Quantity(
-                    value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                sigmas=(
+                    openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 ),
-            ),
-            sigmas=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
+            )
         )
-    )
+    elif "2p4" in prefix:
+        forcefieldlibrary.add_nonbonded_range(
+            TargetNonbondedRange(
+                bead_class="m",
+                bead_element="Pd",
+                epsilons=(
+                    openmm.unit.Quantity(
+                        value=10.0,
+                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    ),
+                ),
+                sigmas=(
+                    openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+                ),
+            )
+        )
+
     forcefieldlibrary.add_nonbonded_range(
         TargetNonbondedRange(
             bead_class="b",
@@ -549,12 +580,12 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
 
     count = 0
     for force_field in forcefieldlibrary.yield_forcefields(
-        prefix=prefix, output_path=calculation_output
+        output_path=calculation_output
     ):
         force_field.write_xml_file()
         count += 1
 
-    logging.info(f"there are {count} forcefields")
+    logging.info(f"there are {count} forcefields with prefix: {prefix}")
     return forcefieldlibrary
 
 

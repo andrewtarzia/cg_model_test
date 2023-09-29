@@ -77,8 +77,7 @@ def optimise_cage(
         data_json=os.path.join(output_dir, f"{name}_ensemble.json"),
         overwrite=True,
     )
-
-    molecule = run_constrained_optimisation(
+    temp_molecule = run_constrained_optimisation(
         molecule=molecule,
         name=name,
         output_dir=output_dir,
@@ -88,10 +87,9 @@ def optimise_cage(
         max_iterations=20,
         platform=platform,
     )
-
     logging.info(f"optimisation of {name}")
     conformer = run_optimisation(
-        molecule=molecule,
+        molecule=temp_molecule,
         name=name,
         file_suffix="opt1",
         output_dir=output_dir,

@@ -9,16 +9,15 @@ Author: Andrew Tarzia
 
 """
 
-import itertools
 import logging
 import os
 import sys
 import pathlib
 
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import stk
+from cgexplore.assigned_system import AssignedSystem
 from cgexplore.beads import bead_library_check, CgBead
 from cgexplore.forcefield import Forcefield
 from cgexplore.openmm_optimizer import CGOMMDynamics, CGOMMOptimizer
@@ -107,7 +106,6 @@ def define_force_field(c_bead, calculation_output):
                 ),
             ),
         ),
-        custom_angle_terms=(),
         torsion_terms=(
             TargetTorsion(
                 search_string=("c", "c", "c", "c"),
@@ -121,7 +119,6 @@ def define_force_field(c_bead, calculation_output):
                 torsion_n=1,
             ),
         ),
-        custom_torsion_terms=(),
         nonbonded_terms=(
             TargetNonbonded(
                 bead_class="c",
@@ -133,11 +130,11 @@ def define_force_field(c_bead, calculation_output):
                 sigma=openmm.unit.Quantity(
                     value=1.0, unit=openmm.unit.angstrom
                 ),
+                force="custom-excl-vol",
             ),
         ),
         vdw_bond_cutoff=2,
     )
-    force_field.write_xml_file()
     return force_field
 
 
@@ -162,6 +159,8 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
         6: ("gray", 2000, "--", None),
     }
 
+    assigned_system = force_field.assign_terms(linear_bb)
+
     tdict = {}
     for run in runs:
         tdict[run] = {}
@@ -180,7 +179,7 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
             traj_freq=100,
             platform=runs[run][3],
         )
-        trajectory = opt.run_dynamics(linear_bb)
+        trajectory = opt.run_dynamics(assigned_system)
 
         traj_log = trajectory.get_data()
         for conformer in trajectory.yield_conformers():
@@ -288,6 +287,8 @@ def test1(c_bead, force_field, calculation_output, figure_output):
         10: "green",
     }
 
+    assigned_system = force_field.assign_terms(linear_bb)
+
     tdict = {}
     for temp in tcol:
         tdict[temp] = {}
@@ -306,7 +307,7 @@ def test1(c_bead, force_field, calculation_output, figure_output):
             platform=None,
         )
 
-        trajectory = opt.run_dynamics(linear_bb)
+        trajectory = opt.run_dynamics(assigned_system)
 
         traj_log = trajectory.get_data()
         for conformer in trajectory.yield_conformers():
@@ -333,7 +334,12 @@ def test1(c_bead, force_field, calculation_output, figure_output):
             force_field=force_field,
             platform=None,
         )
-        energy = opt.calculate_energy(new_bb)
+        energy = opt.calculate_energy(
+            AssignedSystem(
+                molecule=new_bb,
+                force_field_terms=assigned_system.force_field_terms,
+            )
+        )
         distance = np.linalg.norm(new_posmat[1] - new_posmat[0])
         xys.append(
             (
@@ -391,157 +397,6 @@ def test1(c_bead, force_field, calculation_output, figure_output):
     plt.close()
 
 
-def test2(c_bead, force_field, calculation_output, figure_output):
-    linear_bb = stk.BuildingBlock(
-        smiles=(
-            f"[{c_bead.element_string}][{c_bead.element_string}]"
-            f"[{c_bead.element_string}]"
-        ),
-        position_matrix=[[0, 0, 0], [2, 0, 0], [3, 0, 0]],
-    )
-    bond_k = 1e5
-    bond_r = 2.0
-
-    tcol = {
-        700: "k",
-        300: "gold",
-        100: "orange",
-        10: "green",
-    }
-
-    tdict = {}
-    for temp in tcol:
-        tdict[temp] = {}
-        logging.info(f"running MD test2; {temp}")
-        opt = CGOMMDynamics(
-            fileprefix=f"mdl2_{temp}",
-            output_dir=calculation_output,
-            force_field=force_field,
-            temperature=temp,
-            random_seed=1000,
-            num_steps=10000,
-            time_step=1 * openmm.unit.femtoseconds,
-            friction=1.0 / openmm.unit.picosecond,
-            reporting_freq=100,
-            traj_freq=100,
-            platform=None,
-        )
-
-        trajectory = opt.run_dynamics(linear_bb)
-
-        traj_log = trajectory.get_data()
-        for conformer in trajectory.yield_conformers():
-            timestep = conformer.timestep
-            row = traj_log[traj_log['#"Step"'] == timestep].iloc[0]
-            meas_temp = float(row["Temperature (K)"])
-            pot_energy = float(row["Potential Energy (kJ/mole)"])
-            posmat = conformer.molecule.get_position_matrix()
-            distance1 = np.linalg.norm(posmat[1] - posmat[0])
-            distance2 = np.linalg.norm(posmat[2] - posmat[1])
-            tdict[temp][timestep] = (
-                meas_temp,
-                pot_energy,
-                distance1,
-                distance2,
-            )
-
-    coords1 = np.linspace(0.8, 1.2, 10)
-    coords2 = np.linspace(1.0, 1.5, 10)
-    xys = []
-    for i, (coord1, coord2) in enumerate(itertools.product(coords1, coords2)):
-        name = f"l2_{i}"
-        new_posmat = linear_bb.get_position_matrix()
-        new_posmat[1] = new_posmat[1] * coord1
-        new_posmat[2] = new_posmat[2] * coord2
-        new_bb = linear_bb.with_position_matrix(new_posmat)
-        new_bb.write(str(calculation_output / f"{name}.mol"))
-        logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
-            fileprefix=f"{name}_om2",
-            output_dir=calculation_output,
-            force_field=force_field,
-            platform=None,
-        )
-        energy = opt.calculate_energy(new_bb)
-        distance1 = np.linalg.norm(new_posmat[1] - new_posmat[0])
-        distance2 = np.linalg.norm(new_posmat[2] - new_posmat[1])
-        xys.append(
-            (
-                distance1,
-                distance2,
-                energy.value_in_unit(openmm.unit.kilojoules_per_mole),
-            )
-        )
-
-    min_xy = None
-    min_energy = 1e24
-    for i in xys:
-        if i[2] < min_energy:
-            min_xy = i
-            min_energy = i[2]
-
-    vmax = 4
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.set_title(f"{bond_r} A, {bond_k} kJ/mol/nm2", fontsize=16.0)
-
-    ax.scatter(
-        [i[0] for i in xys],
-        [i[1] for i in xys],
-        c=[i[2] for i in xys],
-        vmin=0,
-        vmax=vmax,
-        alpha=1.0,
-        # edgecolor="k",
-        s=30,
-        cmap="Blues",
-    )
-    ax.scatter(
-        min_xy[0],
-        min_xy[1],
-        c="r",
-        alpha=1.0,
-        edgecolor="k",
-        s=40,
-    )
-
-    for temp in tdict:
-        data = tdict[temp]
-        ax.scatter(
-            [data[i][2] for i in data],
-            [data[i][3] for i in data],
-            c=tcol[temp],
-            s=30,
-            edgecolor="none",
-            alpha=1.0,
-            label=f"{temp} K",
-        )
-
-    ax.axhline(y=bond_r, c="k", lw=1)
-    ax.axvline(x=bond_r, c="k", lw=1)
-    ax.tick_params(axis="both", which="major", labelsize=16)
-    ax.set_xlabel("distance 1 [A]", fontsize=16)
-    ax.set_xlabel("distance 2 [A]", fontsize=16)
-
-    cbar_ax = fig.add_axes([1.01, 0.15, 0.02, 0.7])
-    cmap = mpl.cm.Blues
-    norm = mpl.colors.Normalize(vmin=0, vmax=vmax)
-    cbar = fig.colorbar(
-        mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
-        cax=cbar_ax,
-        orientation="vertical",
-    )
-    cbar.ax.tick_params(labelsize=16)
-    cbar.set_label("energy [kJmol-1]", fontsize=16)
-    ax.legend(fontsize=16)
-    fig.tight_layout()
-    fig.savefig(
-        os.path.join(figure_output, "l2.png"),
-        dpi=720,
-        bbox_inches="tight",
-    )
-    plt.close()
-
-
 def test3(c_bead, force_field, calculation_output, figure_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
@@ -558,6 +413,8 @@ def test3(c_bead, force_field, calculation_output, figure_output):
         100: "orange",
         10: "green",
     }
+
+    assigned_system = force_field.assign_terms(linear_bb)
 
     tdict = {}
     for temp in tcol:
@@ -577,7 +434,7 @@ def test3(c_bead, force_field, calculation_output, figure_output):
             platform=None,
         )
 
-        trajectory = opt.run_dynamics(linear_bb)
+        trajectory = opt.run_dynamics(assigned_system)
 
         traj_log = trajectory.get_data()
         for conformer in trajectory.yield_conformers():
@@ -606,7 +463,12 @@ def test3(c_bead, force_field, calculation_output, figure_output):
             force_field=force_field,
             platform=None,
         )
-        energy = opt.calculate_energy(new_bb)
+        energy = opt.calculate_energy(
+            AssignedSystem(
+                molecule=new_bb,
+                force_field_terms=assigned_system.force_field_terms,
+            )
+        )
         pos_mat = new_bb.get_position_matrix()
         vector1 = pos_mat[1] - pos_mat[0]
         vector2 = pos_mat[2] - pos_mat[0]
@@ -688,6 +550,8 @@ def test4(c_bead, force_field, calculation_output, figure_output):
         10: "green",
     }
 
+    assigned_system = force_field.assign_terms(linear_bb)
+
     tdict = {}
     for temp in tcol:
         tdict[temp] = {}
@@ -706,7 +570,7 @@ def test4(c_bead, force_field, calculation_output, figure_output):
             platform=None,
         )
 
-        trajectory = opt.run_dynamics(linear_bb)
+        trajectory = opt.run_dynamics(assigned_system)
 
         traj_log = trajectory.get_data()
         for conformer in trajectory.yield_conformers():
@@ -738,7 +602,12 @@ def test4(c_bead, force_field, calculation_output, figure_output):
             force_field=force_field,
             platform=None,
         )
-        energy = opt.calculate_energy(new_bb)
+        energy = opt.calculate_energy(
+            AssignedSystem(
+                molecule=new_bb,
+                force_field_terms=assigned_system.force_field_terms,
+            )
+        )
         pos_mat = new_bb.get_position_matrix()
         torsion = get_dihedral(
             pt1=pos_mat[0],
@@ -815,7 +684,9 @@ def test5(c_bead, force_field, calculation_output, figure_output):
     sigma = 1.0
     epsilon = 10
 
-    coords = np.linspace(sigma, 10, 50)
+    assigned_system = force_field.assign_terms(linear_bb)
+
+    coords = list(np.linspace(sigma, 2, 20)) + list(np.linspace(3, 10, 7))
     xys = []
     for i, coord in enumerate(coords):
         name = f"l5_{i}"
@@ -829,7 +700,12 @@ def test5(c_bead, force_field, calculation_output, figure_output):
             force_field=force_field,
             platform=None,
         )
-        energy = opt.calculate_energy(new_bb)
+        energy = opt.calculate_energy(
+            AssignedSystem(
+                molecule=new_bb,
+                force_field_terms=assigned_system.force_field_terms,
+            )
+        )
         distance = np.linalg.norm(new_posmat[1] - new_posmat[0])
         xys.append(
             (
@@ -914,13 +790,10 @@ def main():
     force_field = define_force_field(c_bead, calculation_output)
 
     test1(c_bead, force_field, calculation_output, figure_output)
-    test2(c_bead, force_field, calculation_output, figure_output)
     test3(c_bead, force_field, calculation_output, figure_output)
     test4(c_bead, force_field, calculation_output, figure_output)
     test5(c_bead, force_field, calculation_output, figure_output)
     random_test(c_bead, force_field, calculation_output, figure_output)
-
-    raise SystemExit("want to use this to define the flexibility widths?")
 
 
 if __name__ == "__main__":

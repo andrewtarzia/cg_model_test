@@ -23,6 +23,7 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from cgexplore.bonds import TargetBondRange
+from cgexplore.assigned_system import AssignedSystem
 from cgexplore.angles import TargetAngleRange, PyramidAngleRange
 from cgexplore.torsions import TargetTorsionRange, TargetTorsion
 from cgexplore.nonbonded import TargetNonbondedRange
@@ -33,7 +34,7 @@ from cgexplore.generation_utilities import (
     run_optimisation,
     run_soft_md_cycle,
     yield_shifted_models,
-    yield_near_models,
+    # yield_near_models,
     optimise_ligand,
 )
 from cgexplore.geom import GeomMeasure
@@ -70,6 +71,8 @@ def optimise_cage(
         )
         return ensemble.get_lowest_e_conformer()
 
+    assigned_system = force_field.assign_terms(molecule, name, output_dir)
+
     ensemble = Ensemble(
         base_molecule=molecule,
         base_mol_path=os.path.join(output_dir, f"{name}_base.mol"),
@@ -78,22 +81,28 @@ def optimise_cage(
         overwrite=True,
     )
     temp_molecule = run_constrained_optimisation(
-        molecule=molecule,
+        assigned_system=assigned_system,
         name=name,
         output_dir=output_dir,
-        force_field=force_field,
         bond_ff_scale=10,
         angle_ff_scale=10,
         max_iterations=20,
         platform=platform,
     )
+
     logging.info(f"optimisation of {name}")
     conformer = run_optimisation(
-        molecule=temp_molecule,
+        assigned_system=AssignedSystem(
+            molecule=temp_molecule,
+            force_field_terms=assigned_system.force_field_terms,
+            system_xml=assigned_system.system_xml,
+            topology_xml=assigned_system.topology_xml,
+            bead_set=assigned_system.bead_set,
+            vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
+        ),
         name=name,
         file_suffix="opt1",
         output_dir=output_dir,
-        force_field=force_field,
         # max_iterations=50,
         platform=platform,
     )
@@ -104,42 +113,57 @@ def optimise_cage(
     logging.info(f"optimisation of shifted structures of {name}")
     for test_molecule in yield_shifted_models(temp_molecule, force_field):
         conformer = run_optimisation(
-            molecule=test_molecule,
+            assigned_system=AssignedSystem(
+                molecule=test_molecule,
+                force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
+            ),
             name=name,
             file_suffix="sopt",
             output_dir=output_dir,
-            force_field=force_field,
             # max_iterations=50,
             platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="shifted")
 
     # Collect and optimise structures nearby in phase space.
-    logging.info(f"optimisation of nearby structures of {name}")
-    for test_molecule in yield_near_models(
-        molecule=molecule,
-        name=name,
-        output_dir=output_dir,
-    ):
-        conformer = run_optimisation(
-            molecule=test_molecule,
-            name=name,
-            file_suffix="nopt",
-            output_dir=output_dir,
-            force_field=force_field,
-            # max_iterations=50,
-            platform=platform,
-        )
-        ensemble.add_conformer(conformer=conformer, source="nearby_opt")
+    # logging.info(f"optimisation of nearby structures of {name}")
+    # for test_molecule in yield_near_models(
+    #     molecule=molecule,
+    #     name=name,
+    #     output_dir=output_dir,
+    # ):
+    #     conformer = run_optimisation(
+    #         assigned_system=AssignedSystem(
+    #             molecule=test_molecule,
+    #             force_field_terms=assigned_system.force_field_terms,
+    #         ),
+    #         name=name,
+    #         file_suffix="nopt",
+    #         output_dir=output_dir,
+    #         force_field=force_field,
+    #         # max_iterations=50,
+    #         platform=platform,
+    #     )
+    #     ensemble.add_conformer(conformer=conformer, source="nearby_opt")
 
     logging.info(f"soft MD run of {name}")
     num_steps = 20000
     traj_freq = 500
     soft_md_trajectory = run_soft_md_cycle(
         name=name,
-        molecule=ensemble.get_lowest_e_conformer().molecule,
+        assigned_system=AssignedSystem(
+            molecule=ensemble.get_lowest_e_conformer().molecule,
+            force_field_terms=assigned_system.force_field_terms,
+            system_xml=assigned_system.system_xml,
+            topology_xml=assigned_system.topology_xml,
+            bead_set=assigned_system.bead_set,
+            vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
+        ),
         output_dir=output_dir,
-        force_field=force_field,
         suffix="smd",
         bond_ff_scale=10,
         angle_ff_scale=10,
@@ -168,11 +192,17 @@ def optimise_cage(
     # Optimise them all.
     for md_conformer in soft_md_trajectory.yield_conformers():
         conformer = run_optimisation(
-            molecule=md_conformer.molecule,
+            assigned_system=AssignedSystem(
+                molecule=md_conformer.molecule,
+                force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
+            ),
             name=name,
             file_suffix="smd_mdc",
             output_dir=output_dir,
-            force_field=force_field,
             # max_iterations=50,
             platform=platform,
         )
@@ -236,7 +266,7 @@ def compare_final_energies(path1, path2):
     return e1, e2
 
 
-def define_forcefield_library(full_bead_library, calculation_output, prefix):
+def define_forcefield_library(full_bead_library, prefix):
     forcefieldlibrary = ForceFieldLibrary(
         bead_library=full_bead_library,
         vdw_bond_cutoff=2,
@@ -512,6 +542,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             sigmas=(
                 openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
             ),
+            force="custom-excl-vol",
         )
     )
     forcefieldlibrary.add_nonbonded_range(
@@ -527,6 +558,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             sigmas=(
                 openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
             ),
+            force="custom-excl-vol",
         )
     )
     if "2p3" in prefix:
@@ -543,6 +575,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
                 sigmas=(
                     openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 ),
+                force="custom-excl-vol",
             )
         )
     elif "2p4" in prefix:
@@ -559,6 +592,7 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
                 sigmas=(
                     openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 ),
+                force="custom-excl-vol",
             )
         )
 
@@ -575,17 +609,10 @@ def define_forcefield_library(full_bead_library, calculation_output, prefix):
             sigmas=(
                 openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
             ),
+            force="custom-excl-vol",
         )
     )
 
-    count = 0
-    for force_field in forcefieldlibrary.yield_forcefields(
-        output_path=calculation_output
-    ):
-        force_field.write_xml_file()
-        count += 1
-
-    logging.info(f"there are {count} forcefields with prefix: {prefix}")
     return forcefieldlibrary
 
 
@@ -969,12 +996,10 @@ def main():
     logging.info(f"defining force field for {prefix}")
     forcefieldlibrary_2p3 = define_forcefield_library(
         full_bead_library=full_bead_library,
-        calculation_output=calculation_output,
         prefix=prefix + "_2p3",
     )
     forcefieldlibrary_2p4 = define_forcefield_library(
         full_bead_library=full_bead_library,
-        calculation_output=calculation_output,
         prefix=prefix + "_2p4",
     )
 

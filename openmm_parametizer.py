@@ -159,7 +159,11 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
         6: ("gray", 2000, "--", None),
     }
 
-    assigned_system = force_field.assign_terms(linear_bb)
+    assigned_system = force_field.assign_terms(
+        molecule=linear_bb,
+        name="rt",
+        output_dir=calculation_output,
+    )
 
     tdict = {}
     for run in runs:
@@ -169,7 +173,6 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMDynamics(
             fileprefix=f"mdr_{run}",
             output_dir=calculation_output,
-            force_field=force_field,
             temperature=temperature,
             random_seed=runs[run][1],
             num_steps=2000,
@@ -287,7 +290,11 @@ def test1(c_bead, force_field, calculation_output, figure_output):
         10: "green",
     }
 
-    assigned_system = force_field.assign_terms(linear_bb)
+    assigned_system = force_field.assign_terms(
+        molecule=linear_bb,
+        name="t1",
+        output_dir=calculation_output,
+    )
 
     tdict = {}
     for temp in tcol:
@@ -296,7 +303,6 @@ def test1(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMDynamics(
             fileprefix=f"mdl1_{temp}",
             output_dir=calculation_output,
-            force_field=force_field,
             temperature=temp,
             random_seed=1000,
             num_steps=10000,
@@ -331,13 +337,16 @@ def test1(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMOptimizer(
             fileprefix=f"{name}_om1",
             output_dir=calculation_output,
-            force_field=force_field,
             platform=None,
         )
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
                 force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
             )
         )
         distance = np.linalg.norm(new_posmat[1] - new_posmat[0])
@@ -414,7 +423,11 @@ def test3(c_bead, force_field, calculation_output, figure_output):
         10: "green",
     }
 
-    assigned_system = force_field.assign_terms(linear_bb)
+    assigned_system = force_field.assign_terms(
+        molecule=linear_bb,
+        name="t3",
+        output_dir=calculation_output,
+    )
 
     tdict = {}
     for temp in tcol:
@@ -423,7 +436,6 @@ def test3(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMDynamics(
             fileprefix=f"mdl3_{temp}",
             output_dir=calculation_output,
-            force_field=force_field,
             temperature=temp,
             random_seed=1000,
             num_steps=10000,
@@ -460,13 +472,16 @@ def test3(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMOptimizer(
             fileprefix=f"{name}_om3",
             output_dir=calculation_output,
-            force_field=force_field,
             platform=None,
         )
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
                 force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
             )
         )
         pos_mat = new_bb.get_position_matrix()
@@ -550,7 +565,11 @@ def test4(c_bead, force_field, calculation_output, figure_output):
         10: "green",
     }
 
-    assigned_system = force_field.assign_terms(linear_bb)
+    assigned_system = force_field.assign_terms(
+        molecule=linear_bb,
+        name="t4",
+        output_dir=calculation_output,
+    )
 
     tdict = {}
     for temp in tcol:
@@ -559,7 +578,6 @@ def test4(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMDynamics(
             fileprefix=f"mdl4_{temp}",
             output_dir=calculation_output,
-            force_field=force_field,
             temperature=temp,
             random_seed=1000,
             num_steps=10000,
@@ -599,13 +617,16 @@ def test4(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMOptimizer(
             fileprefix=f"{name}_om4",
             output_dir=calculation_output,
-            force_field=force_field,
             platform=None,
         )
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
                 force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
             )
         )
         pos_mat = new_bb.get_position_matrix()
@@ -684,7 +705,11 @@ def test5(c_bead, force_field, calculation_output, figure_output):
     sigma = 1.0
     epsilon = 10
 
-    assigned_system = force_field.assign_terms(linear_bb)
+    assigned_system = force_field.assign_terms(
+        molecule=linear_bb,
+        name="t5",
+        output_dir=calculation_output,
+    )
 
     coords = list(np.linspace(sigma, 2, 20)) + list(np.linspace(3, 10, 7))
     xys = []
@@ -697,13 +722,16 @@ def test5(c_bead, force_field, calculation_output, figure_output):
         opt = CGOMMOptimizer(
             fileprefix=f"{name}_om5",
             output_dir=calculation_output,
-            force_field=force_field,
             platform=None,
         )
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
                 force_field_terms=assigned_system.force_field_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
             )
         )
         distance = np.linalg.norm(new_posmat[1] - new_posmat[0])

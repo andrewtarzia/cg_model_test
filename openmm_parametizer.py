@@ -138,7 +138,7 @@ def define_force_field(c_bead, calculation_output):
     return force_field
 
 
-def random_test(c_bead, force_field, calculation_output, figure_output):
+def random_test(c_bead, force_field, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}]([{c_bead.element_string}])"
@@ -268,7 +268,7 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
 
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "random_test.png"),
+        "random_test.png",
         dpi=720,
         bbox_inches="tight",
     )
@@ -276,7 +276,7 @@ def random_test(c_bead, force_field, calculation_output, figure_output):
     raise SystemExit()
 
 
-def test1(c_bead, force_field, calculation_output, figure_output):
+def test1(c_bead, force_field, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=f"[{c_bead.element_string}][{c_bead.element_string}]",
         position_matrix=[[0, 0, 0], [2, 0, 0]],
@@ -399,14 +399,14 @@ def test1(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l1.png"),
+        "l1.png",
         dpi=720,
         bbox_inches="tight",
     )
     plt.close()
 
 
-def test3(c_bead, force_field, calculation_output, figure_output):
+def test3(c_bead, force_field, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}]([{c_bead.element_string}])"
@@ -540,14 +540,14 @@ def test3(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l3.png"),
+        "l3.png",
         dpi=720,
         bbox_inches="tight",
     )
     plt.close()
 
 
-def test4(c_bead, force_field, calculation_output, figure_output):
+def test4(c_bead, force_field, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}][{c_bead.element_string}]"
@@ -689,14 +689,14 @@ def test4(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l4.png"),
+        "l4.png",
         dpi=720,
         bbox_inches="tight",
     )
     plt.close()
 
 
-def test5(c_bead, force_field, calculation_output, figure_output):
+def test5(c_bead, force_field, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=f"[{c_bead.element_string}].[{c_bead.element_string}]",
         position_matrix=[[0, 0, 0], [1, 0, 0]],
@@ -782,7 +782,7 @@ def test5(c_bead, force_field, calculation_output, figure_output):
     ax.legend(fontsize=16)
     fig.tight_layout()
     fig.savefig(
-        os.path.join(figure_output, "l5.png"),
+        "l5.png",
         dpi=720,
         bbox_inches="tight",
     )
@@ -804,8 +804,6 @@ def main():
     ligand_output = pathlib.Path().absolute() / path / "ligands"
     check_directory(ligand_output)
 
-    figure_output = pathlib.Path().absolute() / path
-
     # Define bead libraries.
     c_bead = CgBead(
         element_string="Ag",
@@ -817,11 +815,11 @@ def main():
     bead_library_check(full_bead_library)
     force_field = define_force_field(c_bead, calculation_output)
 
-    test1(c_bead, force_field, calculation_output, figure_output)
-    test3(c_bead, force_field, calculation_output, figure_output)
-    test4(c_bead, force_field, calculation_output, figure_output)
-    test5(c_bead, force_field, calculation_output, figure_output)
-    random_test(c_bead, force_field, calculation_output, figure_output)
+    test1(c_bead, force_field, calculation_output)
+    test3(c_bead, force_field, calculation_output)
+    test4(c_bead, force_field, calculation_output)
+    test5(c_bead, force_field, calculation_output)
+    random_test(c_bead, force_field, calculation_output)
 
 
 if __name__ == "__main__":

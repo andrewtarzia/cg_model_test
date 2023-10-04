@@ -72,7 +72,7 @@ def define_force_field(c_bead, calculation_output):
         output_dir=calculation_output,
         prefix="omm",
         present_beads=(c_bead,),
-        bond_terms=(
+        bond_targets=(
             TargetBond(
                 class1="c",
                 class2="c",
@@ -89,7 +89,7 @@ def define_force_field(c_bead, calculation_output):
                 ),
             ),
         ),
-        angle_terms=(
+        angle_targets=(
             TargetAngle(
                 class1="c",
                 class2="c",
@@ -106,7 +106,7 @@ def define_force_field(c_bead, calculation_output):
                 ),
             ),
         ),
-        torsion_terms=(
+        torsion_targets=(
             TargetTorsion(
                 search_string=("c", "c", "c", "c"),
                 search_estring=("Ag", "Ag", "Ag", "Ag"),
@@ -119,7 +119,7 @@ def define_force_field(c_bead, calculation_output):
                 torsion_n=1,
             ),
         ),
-        nonbonded_terms=(
+        nonbonded_targets=(
             TargetNonbonded(
                 bead_class="c",
                 bead_element="Ag",

@@ -10,7 +10,6 @@ Author: Andrew Tarzia
 """
 
 import logging
-import os
 import sys
 import pathlib
 
@@ -69,7 +68,6 @@ def points_in_circum(r, n=100):
 def define_force_field(c_bead, calculation_output):
     force_field = Forcefield(
         identifier=0,
-        output_dir=calculation_output,
         prefix="omm",
         present_beads=(c_bead,),
         bond_targets=(

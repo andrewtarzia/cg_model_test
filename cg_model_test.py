@@ -111,7 +111,9 @@ def optimise_cage(
     # Run optimisations of series of conformers with shifted out
     # building blocks.
     logging.info(f"optimisation of shifted structures of {name}")
-    for test_molecule in yield_shifted_models(temp_molecule, force_field):
+    for test_molecule in yield_shifted_models(
+        temp_molecule, force_field, kicks=(1, 2, 3, 4)
+    ):
         conformer = run_optimisation(
             assigned_system=AssignedSystem(
                 molecule=test_molecule,

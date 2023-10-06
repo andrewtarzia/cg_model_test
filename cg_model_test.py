@@ -1035,11 +1035,7 @@ def main():
         popn_dict = populations[population]
         popn_iterator = itertools.product(
             popn_dict["topologies"],
-            tuple(
-                popn_dict["fflibrary"].yield_forcefields(
-                    output_path=calculation_output
-                )
-            ),
+            tuple(popn_dict["fflibrary"].yield_forcefields()),
         )
         for cage_topo_str, force_field in popn_iterator:
             c2_precursor = popn_dict["c2"]

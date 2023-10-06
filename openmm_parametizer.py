@@ -112,7 +112,7 @@ def define_force_field(c_bead, calculation_output):
                 phi0=openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
                 torsion_k=openmm.unit.Quantity(
                     value=50,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
                 torsion_n=1,
             ),
@@ -123,7 +123,7 @@ def define_force_field(c_bead, calculation_output):
                 bead_element="Ag",
                 epsilon=openmm.unit.Quantity(
                     value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
                 sigma=openmm.unit.Quantity(
                     value=1.0, unit=openmm.unit.angstrom

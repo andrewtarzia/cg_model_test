@@ -520,11 +520,11 @@ def define_forcefield_library(full_bead_library, prefix):
             torsion_ks=(
                 openmm.unit.Quantity(
                     value=50,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
                 openmm.unit.Quantity(
                     value=0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
             torsion_ns=(1,),
@@ -538,7 +538,7 @@ def define_forcefield_library(full_bead_library, prefix):
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
             sigmas=(
@@ -554,7 +554,7 @@ def define_forcefield_library(full_bead_library, prefix):
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
             sigmas=(
@@ -571,7 +571,7 @@ def define_forcefield_library(full_bead_library, prefix):
                 epsilons=(
                     openmm.unit.Quantity(
                         value=10.0,
-                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                        unit=openmm.unit.kilojoules_per_mole,
                     ),
                 ),
                 sigmas=(
@@ -588,7 +588,7 @@ def define_forcefield_library(full_bead_library, prefix):
                 epsilons=(
                     openmm.unit.Quantity(
                         value=10.0,
-                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                        unit=openmm.unit.kilojoules_per_mole,
                     ),
                 ),
                 sigmas=(
@@ -605,7 +605,7 @@ def define_forcefield_library(full_bead_library, prefix):
             epsilons=(
                 openmm.unit.Quantity(
                     value=10.0,
-                    unit=openmm.unit.kilojoule / openmm.unit.mole,
+                    unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
             sigmas=(
@@ -758,7 +758,7 @@ def analysis(
                     ),
                     torsion_k=openmm.unit.Quantity(
                         value=50,
-                        unit=openmm.unit.kilojoule / openmm.unit.mole,
+                        unit=openmm.unit.kilojoules_per_mole,
                     ),
                     torsion_n=1,
                 ),

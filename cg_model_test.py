@@ -34,7 +34,6 @@ from cgexplore.generation_utilities import (
     run_optimisation,
     run_soft_md_cycle,
     yield_shifted_models,
-    # yield_near_models,
     optimise_ligand,
 )
 from cgexplore.geom import GeomMeasure
@@ -130,27 +129,6 @@ def optimise_cage(
             platform=platform,
         )
         ensemble.add_conformer(conformer=conformer, source="shifted")
-
-    # Collect and optimise structures nearby in phase space.
-    # logging.info(f"optimisation of nearby structures of {name}")
-    # for test_molecule in yield_near_models(
-    #     molecule=molecule,
-    #     name=name,
-    #     output_dir=output_dir,
-    # ):
-    #     conformer = run_optimisation(
-    #         assigned_system=AssignedSystem(
-    #             molecule=test_molecule,
-    #             force_field_terms=assigned_system.force_field_terms,
-    #         ),
-    #         name=name,
-    #         file_suffix="nopt",
-    #         output_dir=output_dir,
-    #         force_field=force_field,
-    #         # max_iterations=50,
-    #         platform=platform,
-    #     )
-    #     ensemble.add_conformer(conformer=conformer, source="nearby_opt")
 
     logging.info(f"soft MD run of {name}")
     num_steps = 20000

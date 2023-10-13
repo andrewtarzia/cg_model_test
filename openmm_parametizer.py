@@ -154,7 +154,7 @@ def random_test(c_bead, force_field, calculation_output):
         3: ("r", 2000, "--", "CPU"),
         4: ("b", None, "-", "CPU"),
         5: ("gold", None, "--", "CPU"),
-        6: ("gray", 2000, "--", None),
+        6: ("gray", 2000, ".-", None),
     }
 
     assigned_system = force_field.assign_terms(

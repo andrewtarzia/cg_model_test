@@ -26,8 +26,9 @@ from cgexplore.bonds import TargetBondRange
 from cgexplore.assigned_system import AssignedSystem
 from cgexplore.angles import TargetAngleRange, PyramidAngleRange
 from cgexplore.torsions import TargetTorsionRange, TargetTorsion
+from cgexplore.databases import AtomliteDatabase
 from cgexplore.nonbonded import TargetNonbondedRange
-from cgexplore.ensembles import Ensemble
+from cgexplore.ensembles import Ensemble, Conformer
 from cgexplore.forcefield import ForceFieldLibrary
 from cgexplore.generation_utilities import (
     run_constrained_optimisation,
@@ -58,8 +59,23 @@ def optimise_cage(
     output_dir,
     force_field,
     platform,
+    database,
 ):
     fina_mol_file = os.path.join(output_dir, f"{name}_final.mol")
+    # Do not rerun if database entry exists.
+    if database.has_molecule(key=name):
+        final_molecule = database.get_molecule(key=name)
+        final_molecule.write(fina_mol_file)
+        return Conformer(
+            molecule=final_molecule,
+            energy_decomposition=database.get_property(
+                key=name,
+                property_key="energy_decomposition",
+                ensure_type=dict,
+            ),
+        )
+
+    # Do not rerun if final mol exists.
     if os.path.exists(fina_mol_file):
         ensemble = Ensemble(
             base_molecule=molecule,
@@ -67,6 +83,16 @@ def optimise_cage(
             conformer_xyz=os.path.join(output_dir, f"{name}_ensemble.xyz"),
             data_json=os.path.join(output_dir, f"{name}_ensemble.json"),
             overwrite=False,
+        )
+        conformer = ensemble.get_lowest_e_conformer()
+        database.add_molecule(molecule=conformer.molecule, key=name)
+        database.add_properties(
+            key=name,
+            property_dict={
+                "energy_decomposition": conformer.energy_decomposition,
+                "source": conformer.source,
+                "optimised": True,
+            },
         )
         return ensemble.get_lowest_e_conformer()
 
@@ -198,6 +224,16 @@ def optimise_cage(
         f" with energy: {min_energy} kJ.mol-1"
     )
 
+    # Add to atomlite database.
+    database.add_molecule(molecule=min_energy_conformer.molecule, key=name)
+    database.add_properties(
+        key=name,
+        property_dict={
+            "energy_decomposition": conformer.energy_decomposition,
+            "source": conformer.source,
+            "optimised": True,
+        },
+    )
     min_energy_conformer.molecule.write(fina_mol_file)
     return min_energy_conformer
 
@@ -224,17 +260,9 @@ def get_final_energy(path):
 
 
 def compare_final_energies(path1, path2):
-    if ".out" in str(path1):
-        e1 = get_final_energy(path1)
-        e2 = get_final_energy(path2)
-        # print(path1.name, path2.name, e1, e2)
-        # assert np.isclose(e1, e2, atol=1e-2, rtol=0)
-
-    elif ".json" in str(path1):
+    if ".json" in str(path1):
         e1, id1 = get_final_energy(path1)
         e2, id2 = get_final_energy(path2)
-        # print("    ", path1.name, path2.name, e1, e2, id1, id2)
-        # assert id1 == id2
     try:
         assert np.isclose(e1, e2, atol=1e-1, rtol=0)
     except AssertionError:
@@ -602,6 +630,7 @@ def analysis(
     struct_done,
     calculation_output,
     calculation_done,
+    database,
 ):
     fig, axs = plt.subplots(ncols=3, nrows=2, figsize=(16, 8))
 
@@ -711,14 +740,12 @@ def analysis(
             alpha=alpha,
         )
 
-        new_struct = stk.BuildingBlock.init_from_file(
-            str(struct_output / f"{cage_name}_optc.mol")
-        )
+        new_struct = database.get_molecule(cage_name)
         old_struct = stk.BuildingBlock.init_from_file(
             str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")
         )
         structure_comparisons.append(
-            f'{str(struct_output / f"{cage_name}_optc.mol")} '
+            f'{str(calculation_output / f"{cage_name}_final.mol")} '
             f'{str(struct_done / f"{old_cage}{old_cage_suffix}_optc.mol")}'
         )
 
@@ -1007,6 +1034,8 @@ def main():
         },
     }
 
+    database = AtomliteDatabase(db_file=struct_output / "cg_model_test.db")
+
     cages = []
     for population in populations:
         logging.info(f"running population {population}")
@@ -1064,6 +1093,7 @@ def main():
                 # platform="CPU",
                 # platform="CUDA",
                 platform=None,
+                database=database,
             )
             if conformer is not None:
                 conformer.molecule.write(
@@ -1078,6 +1108,7 @@ def main():
         struct_done=struct_done,
         calculation_output=calculation_output,
         calculation_done=calculation_done,
+        database=database,
     )
 
 

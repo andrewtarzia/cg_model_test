@@ -39,7 +39,7 @@ from cgexplore.generation_utilities import (
 )
 from cgexplore.geom import GeomMeasure
 from cgexplore.beads import bead_library_check, CgBead
-from cgexplore.molecule_construction.topologies import (
+from cgexplore.molecule_construction import (
     ThreeC1Arm,
     TwoC1Arm,
     FourC1Arm,

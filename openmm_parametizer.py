@@ -1287,7 +1287,6 @@ def main():
 
     uff_angle_test1(c_bead, m_bead, force_field, calculation_output)
     uff_angle_test2(c_bead, n_bead, force_field, calculation_output)
-    raise SystemExit
     test1(c_bead, force_field, calculation_output)
     test3(c_bead, force_field, calculation_output)
     test4(c_bead, force_field, calculation_output)

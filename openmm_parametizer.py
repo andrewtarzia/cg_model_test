@@ -27,6 +27,7 @@ from cgexplore.utilities import (
 )
 from cgexplore.angles import TargetAngle, TargetCosineAngle
 from cgexplore.bonds import TargetBond
+from cgexplore.force_field import ForceField
 from cgexplore.nonbonded import TargetNonbonded
 from cgexplore.torsions import TargetTorsion
 from openmm import openmm

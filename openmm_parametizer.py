@@ -19,7 +19,6 @@ import numpy as np
 import stk
 from cgexplore.assigned_system import AssignedSystem
 from cgexplore.beads import bead_library_check, CgBead, periodic_table
-from cgexplore.forcefield import Forcefield
 from cgexplore.openmm_optimizer import CGOMMDynamics, CGOMMOptimizer
 from cgexplore.utilities import (
     angle_between,
@@ -67,7 +66,7 @@ def points_in_circum(r, n=100):
 
 
 def define_force_field(c_bead, m_bead, n_bead, calculation_output):
-    force_field = Forcefield(
+    force_field = ForceField(
         identifier=0,
         prefix="omm",
         present_beads=(c_bead, m_bead, n_bead),

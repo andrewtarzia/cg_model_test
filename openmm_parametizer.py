@@ -27,7 +27,7 @@ from cgexplore.utilities import (
 )
 from cgexplore.angles import TargetAngle, TargetCosineAngle
 from cgexplore.bonds import TargetBond
-from cgexplore.force_field import ForceField
+from cgexplore.forcefield import ForceField
 from cgexplore.nonbonded import TargetNonbonded
 from cgexplore.torsions import TargetTorsion
 from openmm import openmm
@@ -73,10 +73,10 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
         present_beads=(c_bead, m_bead, n_bead),
         bond_targets=(
             TargetBond(
-                class1="c",
-                class2="c",
-                eclass1="Ag",
-                eclass2="Ag",
+                type1="c1",
+                type2="c1",
+                element1="Ag",
+                element2="Ag",
                 bond_r=openmm.unit.Quantity(
                     value=2.0, unit=openmm.unit.angstrom
                 ),
@@ -88,10 +88,10 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
                 ),
             ),
             TargetBond(
-                class1="c",
-                class2="m",
-                eclass1="Ag",
-                eclass2="Fe",
+                type1="c1",
+                type2="m1",
+                element1="Ag",
+                element2="Fe",
                 bond_r=openmm.unit.Quantity(
                     value=2.0, unit=openmm.unit.angstrom
                 ),
@@ -103,10 +103,10 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
                 ),
             ),
             TargetBond(
-                class1="c",
-                class2="n",
-                eclass1="Ag",
-                eclass2="N",
+                type1="c1",
+                type2="n1",
+                element1="Ag",
+                element2="N",
                 bond_r=openmm.unit.Quantity(
                     value=2.0, unit=openmm.unit.angstrom
                 ),
@@ -120,12 +120,12 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
         ),
         angle_targets=(
             TargetAngle(
-                class1="c",
-                class2="c",
-                class3="c",
-                eclass1="Ag",
-                eclass2="Ag",
-                eclass3="Ag",
+                type1="c1",
+                type2="c1",
+                type3="c1",
+                element1="Ag",
+                element2="Ag",
+                element3="Ag",
                 angle=openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
                 angle_k=openmm.unit.Quantity(
                     value=1e2,
@@ -135,12 +135,12 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
                 ),
             ),
             TargetCosineAngle(
-                class1="c",
-                class2="m",
-                class3="c",
-                eclass1="Ag",
-                eclass2="Fe",
-                eclass3="Ag",
+                type1="c1",
+                type2="m1",
+                type3="c1",
+                element1="Ag",
+                element2="Fe",
+                element3="Ag",
                 n=4,
                 b=1,
                 angle_k=openmm.unit.Quantity(
@@ -148,12 +148,12 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
                 ),
             ),
             TargetCosineAngle(
-                class1="c",
-                class2="n",
-                class3="c",
-                eclass1="Ag",
-                eclass2="N",
-                eclass3="Ag",
+                type1="c1",
+                type2="n1",
+                type3="c1",
+                element1="Ag",
+                element2="N",
+                element3="Ag",
                 n=3,
                 b=-1,
                 angle_k=openmm.unit.Quantity(
@@ -163,7 +163,7 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
         ),
         torsion_targets=(
             TargetTorsion(
-                search_string=("c", "c", "c", "c"),
+                search_string=("c1", "c1", "c1", "c1"),
                 search_estring=("Ag", "Ag", "Ag", "Ag"),
                 measured_atom_ids=[0, 1, 2, 3],
                 phi0=openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
@@ -352,7 +352,6 @@ def random_test(c_bead, force_field, calculation_output):
         bbox_inches="tight",
     )
     plt.close()
-    raise SystemExit()
 
 
 def test1(c_bead, force_field, calculation_output):

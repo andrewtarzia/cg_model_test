@@ -71,7 +71,7 @@ def optimise_cage(
             energy_decomposition=database.get_property(
                 key=name,
                 property_key="energy_decomposition",
-                ensure_type=dict,
+                property_type=dict,
             ),
         )
 
@@ -282,10 +282,10 @@ def define_forcefield_library(full_bead_library, prefix):
     )
     forcefieldlibrary.add_bond_range(
         TargetBondRange(
-            class1="a1",
-            class2="c1",
-            eclass1="Ba",
-            eclass2="Ag",
+            type1="a1",
+            type2="c1",
+            element1="Ba",
+            element2="Ag",
             bond_rs=(
                 openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
             ),
@@ -301,10 +301,10 @@ def define_forcefield_library(full_bead_library, prefix):
     )
     forcefieldlibrary.add_bond_range(
         TargetBondRange(
-            class1="a1",
-            class2="b1",
-            eclass1="Ba",
-            eclass2="Pb",
+            type1="a1",
+            type2="b1",
+            element1="Ba",
+            element2="Pb",
             bond_rs=(
                 openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
             ),
@@ -321,10 +321,10 @@ def define_forcefield_library(full_bead_library, prefix):
     if "2p3" in prefix:
         forcefieldlibrary.add_bond_range(
             TargetBondRange(
-                class1="b1",
-                class2="n1",
-                eclass1="Pb",
-                eclass2="C",
+                type1="b1",
+                type2="n1",
+                element1="Pb",
+                element2="C",
                 bond_rs=(
                     openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
                 ),
@@ -341,10 +341,10 @@ def define_forcefield_library(full_bead_library, prefix):
     elif "2p4" in prefix:
         forcefieldlibrary.add_bond_range(
             TargetBondRange(
-                class1="b1",
-                class2="m1",
-                eclass1="Pb",
-                eclass2="Pd",
+                type1="b1",
+                type2="m1",
+                element1="Pb",
+                element2="Pd",
                 bond_rs=(
                     openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
                 ),
@@ -361,12 +361,12 @@ def define_forcefield_library(full_bead_library, prefix):
 
     forcefieldlibrary.add_angle_range(
         TargetAngleRange(
-            class1="a1",
-            class2="c1",
-            class3="a1",
-            eclass1="Ba",
-            eclass2="Ag",
-            eclass3="Ba",
+            type1="a1",
+            type2="c1",
+            type3="a1",
+            element1="Ba",
+            element2="Ag",
+            element3="Ba",
             angles=(
                 openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
             ),
@@ -383,12 +383,12 @@ def define_forcefield_library(full_bead_library, prefix):
     if "2p3" in prefix:
         forcefieldlibrary.add_angle_range(
             TargetAngleRange(
-                class1="b1",
-                class2="a1",
-                class3="c1",
-                eclass1="Pb",
-                eclass2="Ba",
-                eclass3="Ag",
+                type1="b1",
+                type2="a1",
+                type3="c1",
+                element1="Pb",
+                element2="Ba",
+                element3="Ag",
                 angles=(
                     openmm.unit.Quantity(value=125, unit=openmm.unit.degrees),
                     openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
@@ -407,12 +407,12 @@ def define_forcefield_library(full_bead_library, prefix):
     elif "2p4" in prefix:
         forcefieldlibrary.add_angle_range(
             TargetAngleRange(
-                class1="b1",
-                class2="a1",
-                class3="c1",
-                eclass1="Pb",
-                eclass2="Ba",
-                eclass3="Ag",
+                type1="b1",
+                type2="a1",
+                type3="c1",
+                element1="Pb",
+                element2="Ba",
+                element3="Ag",
                 angles=(
                     openmm.unit.Quantity(value=135, unit=openmm.unit.degrees),
                     openmm.unit.Quantity(value=160, unit=openmm.unit.degrees),
@@ -430,12 +430,12 @@ def define_forcefield_library(full_bead_library, prefix):
     if "2p3" in prefix:
         forcefieldlibrary.add_angle_range(
             TargetAngleRange(
-                class1="n1",
-                class2="b1",
-                class3="a1",
-                eclass1="C",
-                eclass2="Pb",
-                eclass3="Ba",
+                type1="n1",
+                type2="b1",
+                type3="a1",
+                element1="C",
+                element2="Pb",
+                element3="Ba",
                 angles=(
                     openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
                 ),
@@ -451,12 +451,12 @@ def define_forcefield_library(full_bead_library, prefix):
         )
         forcefieldlibrary.add_angle_range(
             TargetAngleRange(
-                class1="b1",
-                class2="n1",
-                class3="b1",
-                eclass1="Pb",
-                eclass2="C",
-                eclass3="Pb",
+                type1="b1",
+                type2="n1",
+                type3="b1",
+                element1="Pb",
+                element2="C",
+                element3="Pb",
                 angles=(
                     openmm.unit.Quantity(value=70, unit=openmm.unit.degrees),
                     openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
@@ -475,12 +475,12 @@ def define_forcefield_library(full_bead_library, prefix):
     elif "2p4" in prefix:
         forcefieldlibrary.add_angle_range(
             TargetAngleRange(
-                class1="m1",
-                class2="b1",
-                class3="a1",
-                eclass1="Pd",
-                eclass2="Pb",
-                eclass3="Ba",
+                type1="m1",
+                type2="b1",
+                type3="a1",
+                element1="Pd",
+                element2="Pb",
+                element3="Ba",
                 angles=(
                     openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
                 ),
@@ -496,12 +496,12 @@ def define_forcefield_library(full_bead_library, prefix):
         )
         forcefieldlibrary.add_angle_range(
             PyramidAngleRange(
-                class1="b1",
-                class2="m1",
-                class3="b1",
-                eclass1="Pb",
-                eclass2="Pd",
-                eclass3="Pb",
+                type1="b1",
+                type2="m1",
+                type3="b1",
+                element1="Pb",
+                element2="Pd",
+                element3="Pb",
                 angles=(
                     openmm.unit.Quantity(value=80, unit=openmm.unit.degrees),
                     openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
@@ -755,7 +755,7 @@ def analysis(
         g_measure = GeomMeasure(
             target_torsions=(
                 TargetTorsion(
-                    search_string=("b", "a", "c", "a", "b"),
+                    search_string=("b1", "a1", "c1", "a1", "b1"),
                     search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
                     measured_atom_ids=[0, 1, 3, 4],
                     phi0=openmm.unit.Quantity(

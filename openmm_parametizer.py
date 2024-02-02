@@ -66,8 +66,8 @@ def points_in_circum(r, n=100):
     ]
 
 
-def define_force_field(c_bead, m_bead, n_bead, calculation_output):
-    force_field = ForceField(
+def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
+    forcefield = ForceField(
         identifier=0,
         prefix="omm",
         present_beads=(c_bead, m_bead, n_bead),
@@ -214,10 +214,10 @@ def define_force_field(c_bead, m_bead, n_bead, calculation_output):
         ),
         vdw_bond_cutoff=2,
     )
-    return force_field
+    return forcefield
 
 
-def random_test(c_bead, force_field, calculation_output):
+def random_test(c_bead, forcefield, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}]([{c_bead.element_string}])"
@@ -238,7 +238,7 @@ def random_test(c_bead, force_field, calculation_output):
         6: ("gray", 2000, "-.", None),
     }
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=linear_bb,
         name="rt",
         output_dir=calculation_output,
@@ -354,7 +354,7 @@ def random_test(c_bead, force_field, calculation_output):
     plt.close()
 
 
-def test1(c_bead, force_field, calculation_output):
+def test1(c_bead, forcefield, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=f"[{c_bead.element_string}][{c_bead.element_string}]",
         position_matrix=[[0, 0, 0], [2, 0, 0]],
@@ -363,7 +363,7 @@ def test1(c_bead, force_field, calculation_output):
     bond_r = 2.0
     tcol = {700: "k", 300: "gold", 100: "orange", 10: "green"}
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=linear_bb,
         name="t1",
         output_dir=calculation_output,
@@ -415,7 +415,7 @@ def test1(c_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -479,7 +479,7 @@ def test1(c_bead, force_field, calculation_output):
     plt.close()
 
 
-def test3(c_bead, force_field, calculation_output):
+def test3(c_bead, forcefield, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}]([{c_bead.element_string}])"
@@ -491,7 +491,7 @@ def test3(c_bead, force_field, calculation_output):
     angle_c = 90
     tcol = {700: "k", 300: "gold", 100: "orange", 10: "green"}
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=linear_bb,
         name="t3",
         output_dir=calculation_output,
@@ -545,7 +545,7 @@ def test3(c_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -615,7 +615,7 @@ def test3(c_bead, force_field, calculation_output):
     plt.close()
 
 
-def test4(c_bead, force_field, calculation_output):
+def test4(c_bead, forcefield, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=(
             f"[{c_bead.element_string}][{c_bead.element_string}]"
@@ -628,7 +628,7 @@ def test4(c_bead, force_field, calculation_output):
     phi0 = 180
     tcol = {700: "k", 300: "gold", 100: "orange", 10: "green"}
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=linear_bb,
         name="t4",
         output_dir=calculation_output,
@@ -685,7 +685,7 @@ def test4(c_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -759,7 +759,7 @@ def test4(c_bead, force_field, calculation_output):
     plt.close()
 
 
-def test5(c_bead, force_field, calculation_output):
+def test5(c_bead, forcefield, calculation_output):
     linear_bb = stk.BuildingBlock(
         smiles=f"[{c_bead.element_string}].[{c_bead.element_string}]",
         position_matrix=[[0, 0, 0], [1, 0, 0]],
@@ -768,7 +768,7 @@ def test5(c_bead, force_field, calculation_output):
     sigma = 1.0
     epsilon = 10
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=linear_bb,
         name="t5",
         output_dir=calculation_output,
@@ -790,7 +790,7 @@ def test5(c_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -869,7 +869,7 @@ def uff_gen_function(angles, k, theta0):
     return k * (C0 + C1 * np.cos(angles) + C2 * np.cos(2 * angles))
 
 
-def uff_angle_test1(c_bead, m_bead, force_field, calculation_output):
+def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
     pt = periodic_table()
     atoms = (
         stk.Atom(0, pt[m_bead.element_string]),
@@ -923,7 +923,7 @@ def uff_angle_test1(c_bead, m_bead, force_field, calculation_output):
 
     ax = axs[1]
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=oct_complex,
         name="uff",
         output_dir=calculation_output,
@@ -946,7 +946,7 @@ def uff_angle_test1(c_bead, m_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -1075,7 +1075,7 @@ def uff_angle_test1(c_bead, m_bead, force_field, calculation_output):
     plt.close()
 
 
-def uff_angle_test2(c_bead, n_bead, force_field, calculation_output):
+def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
     pt = periodic_table()
     atoms = (
         stk.Atom(0, pt[n_bead.element_string]),
@@ -1125,7 +1125,7 @@ def uff_angle_test2(c_bead, n_bead, force_field, calculation_output):
 
     ax = axs[1]
 
-    assigned_system = force_field.assign_terms(
+    assigned_system = forcefield.assign_terms(
         molecule=tri_complex,
         name="uff2",
         output_dir=calculation_output,
@@ -1148,7 +1148,7 @@ def uff_angle_test2(c_bead, n_bead, force_field, calculation_output):
         energy = opt.calculate_energy(
             AssignedSystem(
                 molecule=new_bb,
-                force_field_terms=assigned_system.force_field_terms,
+                forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
                 topology_xml=assigned_system.topology_xml,
                 bead_set=assigned_system.bead_set,
@@ -1280,17 +1280,15 @@ def main():
     )
     full_bead_library = (c_bead, m_bead, n_bead)
     bead_library_check(full_bead_library)
-    force_field = define_force_field(
-        c_bead, m_bead, n_bead, calculation_output
-    )
+    forcefield = define_forcefield(c_bead, m_bead, n_bead, calculation_output)
 
-    uff_angle_test1(c_bead, m_bead, force_field, calculation_output)
-    uff_angle_test2(c_bead, n_bead, force_field, calculation_output)
-    test1(c_bead, force_field, calculation_output)
-    test3(c_bead, force_field, calculation_output)
-    test4(c_bead, force_field, calculation_output)
-    test5(c_bead, force_field, calculation_output)
-    random_test(c_bead, force_field, calculation_output)
+    uff_angle_test1(c_bead, m_bead, forcefield, calculation_output)
+    uff_angle_test2(c_bead, n_bead, forcefield, calculation_output)
+    test1(c_bead, forcefield, calculation_output)
+    test3(c_bead, forcefield, calculation_output)
+    test4(c_bead, forcefield, calculation_output)
+    test5(c_bead, forcefield, calculation_output)
+    random_test(c_bead, forcefield, calculation_output)
 
     shutil.rmtree(struct_output)
     shutil.rmtree(calculation_output)

@@ -17,19 +17,20 @@ import shutil
 import matplotlib.pyplot as plt
 import numpy as np
 import stk
-from cgexplore.assigned_system import AssignedSystem
-from cgexplore.beads import bead_library_check, CgBead, periodic_table
-from cgexplore.openmm_optimizer import CGOMMDynamics, CGOMMOptimizer
-from cgexplore.utilities import (
-    angle_between,
-    check_directory,
-    get_dihedral,
+from cgexplore.forcefields import AssignedSystem, ForceField, angle_between
+from cgexplore.molecular import bead_library_check, CgBead, periodic_table
+from cgexplore.optimisation import CGOMMDynamics, CGOMMOptimizer
+from cgexplore.utilities import check_directory
+from cgexplore.analysis import get_dihedral
+from cgexplore.terms import (
+    TargetAngle,
+    TargetBond,
+    TargetCosineAngle,
+    TargetNonbonded,
+    TargetTorsion,
 )
-from cgexplore.angles import TargetAngle, TargetCosineAngle
-from cgexplore.bonds import TargetBond
-from cgexplore.forcefield import ForceField
-from cgexplore.nonbonded import TargetNonbonded
-from cgexplore.torsions import TargetTorsion
+
+
 from openmm import openmm
 from rdkit import RDLogger
 

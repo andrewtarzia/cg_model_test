@@ -22,29 +22,34 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-from cgexplore.bonds import TargetBondRange
-from cgexplore.assigned_system import AssignedSystem
-from cgexplore.angles import TargetAngleRange, PyramidAngleRange
-from cgexplore.torsions import TargetTorsionRange, TargetTorsion
-from cgexplore.databases import AtomliteDatabase
-from cgexplore.nonbonded import TargetNonbondedRange
-from cgexplore.ensembles import Ensemble, Conformer
-from cgexplore.forcefield import ForceFieldLibrary
-from cgexplore.generation_utilities import (
+from cgexplore.terms import (
+    TargetBondRange,
+    TargetAngleRange,
+    PyramidAngleRange,
+    TargetTorsionRange,
+    TargetTorsion,
+    TargetNonbondedRange,
+)
+from cgexplore.forcefields import AssignedSystem, ForceFieldLibrary
+from cgexplore.utilities import (
+    AtomliteDatabase,
     run_constrained_optimisation,
     run_optimisation,
     run_soft_md_cycle,
     yield_shifted_models,
     optimise_ligand,
+    check_directory,
 )
-from cgexplore.geom import GeomMeasure
-from cgexplore.beads import bead_library_check, CgBead
-from cgexplore.molecule_construction import (
+from cgexplore.molecular import Ensemble, Conformer
+from cgexplore.analysis import GeomMeasure
+from cgexplore.molecular import (
     ThreeC1Arm,
     TwoC1Arm,
     FourC1Arm,
+    bead_library_check,
+    CgBead,
 )
-from cgexplore.utilities import check_directory
+
 
 logging.basicConfig(
     level=logging.INFO,

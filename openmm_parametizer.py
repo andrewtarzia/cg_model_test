@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import stk
 from cgexplore.forcefields import AssignedSystem, ForceField, angle_between
-from cgexplore.molecular import bead_library_check, CgBead, periodic_table
+from cgexplore.molecular import BeadLibrary, CgBead, periodic_table
 from cgexplore.optimisation import CGOMMDynamics, CGOMMOptimizer
 from cgexplore.utilities import check_directory
 from cgexplore.analysis import get_dihedral
@@ -1279,8 +1279,8 @@ def main():
         bead_type="n1",
         coordination=3,
     )
-    full_bead_library = (c_bead, m_bead, n_bead)
-    bead_library_check(full_bead_library)
+
+    _ = BeadLibrary((c_bead, m_bead, n_bead))
     forcefield = define_forcefield(c_bead, m_bead, n_bead, calculation_output)
 
     uff_angle_test1(c_bead, m_bead, forcefield, calculation_output)

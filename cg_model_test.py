@@ -46,7 +46,6 @@ from cgexplore.molecular import (
     ThreeC1Arm,
     TwoC1Arm,
     FourC1Arm,
-    bead_library_check,
     CgBead,
 )
 
@@ -279,9 +278,9 @@ def compare_final_energies(path1, path2):
     return e1, e2
 
 
-def define_forcefield_library(full_bead_library, prefix):
+def define_forcefield_library(present_beads, prefix):
     forcefieldlibrary = ForceFieldLibrary(
-        bead_library=full_bead_library,
+        present_beads=present_beads,
         vdw_bond_cutoff=2,
         prefix=prefix,
     )
@@ -996,22 +995,21 @@ def main():
         bead_type="m1",
         coordination=4,
     )
-    full_bead_library = (
+    present_beads = (
         core_bead,
         arm_bead,
         binder_bead,
         trigonal_bead,
         tetragonal_bead,
     )
-    bead_library_check(full_bead_library)
 
     logging.info(f"defining force field for {prefix}")
     forcefieldlibrary_2p3 = define_forcefield_library(
-        full_bead_library=full_bead_library,
+        present_beads=present_beads,
         prefix=prefix + "_2p3",
     )
     forcefieldlibrary_2p4 = define_forcefield_library(
-        full_bead_library=full_bead_library,
+        present_beads=present_beads,
         prefix=prefix + "_2p4",
     )
 

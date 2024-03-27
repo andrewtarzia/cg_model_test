@@ -42,12 +42,7 @@ from cgexplore.utilities import (
 )
 from cgexplore.molecular import Ensemble, Conformer
 from cgexplore.analysis import GeomMeasure
-from cgexplore.molecular import (
-    ThreeC1Arm,
-    TwoC1Arm,
-    FourC1Arm,
-    CgBead,
-)
+from cgexplore.molecular import ThreeC1Arm, TwoC1Arm, FourC1Arm, CgBead
 
 
 logging.basicConfig(
@@ -290,9 +285,7 @@ def define_forcefield_library(present_beads, prefix):
             type2="c1",
             element1="Ba",
             element2="Ag",
-            bond_rs=(
-                openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
-            ),
+            bond_rs=(openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),),
             bond_ks=(
                 openmm.unit.Quantity(
                     value=1e5,
@@ -309,9 +302,7 @@ def define_forcefield_library(present_beads, prefix):
             type2="b1",
             element1="Ba",
             element2="Pb",
-            bond_rs=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
+            bond_rs=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
             bond_ks=(
                 openmm.unit.Quantity(
                     value=1e5,
@@ -329,9 +320,7 @@ def define_forcefield_library(present_beads, prefix):
                 type2="n1",
                 element1="Pb",
                 element2="C",
-                bond_rs=(
-                    openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
-                ),
+                bond_rs=(openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),),
                 bond_ks=(
                     openmm.unit.Quantity(
                         value=1e5,
@@ -349,9 +338,7 @@ def define_forcefield_library(present_beads, prefix):
                 type2="m1",
                 element1="Pb",
                 element2="Pd",
-                bond_rs=(
-                    openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),
-                ),
+                bond_rs=(openmm.unit.Quantity(value=1.5, unit=openmm.unit.angstrom),),
                 bond_ks=(
                     openmm.unit.Quantity(
                         value=1e5,
@@ -371,9 +358,7 @@ def define_forcefield_library(present_beads, prefix):
             element1="Ba",
             element2="Ag",
             element3="Ba",
-            angles=(
-                openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
-            ),
+            angles=(openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),),
             angle_ks=(
                 openmm.unit.Quantity(
                     value=1e2,
@@ -440,9 +425,7 @@ def define_forcefield_library(present_beads, prefix):
                 element1="C",
                 element2="Pb",
                 element3="Ba",
-                angles=(
-                    openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
-                ),
+                angles=(openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),),
                 angle_ks=(
                     openmm.unit.Quantity(
                         value=1e2,
@@ -485,9 +468,7 @@ def define_forcefield_library(present_beads, prefix):
                 element1="Pd",
                 element2="Pb",
                 element3="Ba",
-                angles=(
-                    openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
-                ),
+                angles=(openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),),
                 angle_ks=(
                     openmm.unit.Quantity(
                         value=1e2,
@@ -551,9 +532,7 @@ def define_forcefield_library(present_beads, prefix):
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
-            sigmas=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
+            sigmas=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
             force="custom-excl-vol",
         )
     )
@@ -567,9 +546,7 @@ def define_forcefield_library(present_beads, prefix):
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
-            sigmas=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
+            sigmas=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
             force="custom-excl-vol",
         )
     )
@@ -584,9 +561,7 @@ def define_forcefield_library(present_beads, prefix):
                         unit=openmm.unit.kilojoules_per_mole,
                     ),
                 ),
-                sigmas=(
-                    openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-                ),
+                sigmas=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
                 force="custom-excl-vol",
             )
         )
@@ -601,9 +576,7 @@ def define_forcefield_library(present_beads, prefix):
                         unit=openmm.unit.kilojoules_per_mole,
                     ),
                 ),
-                sigmas=(
-                    openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-                ),
+                sigmas=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
                 force="custom-excl-vol",
             )
         )
@@ -618,9 +591,7 @@ def define_forcefield_library(present_beads, prefix):
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
             ),
-            sigmas=(
-                openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
-            ),
+            sigmas=(openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),),
             force="custom-excl-vol",
         )
     )
@@ -728,9 +699,7 @@ def analysis(
         #     path2=calculation_output / f"{i}_opt1_omm.out",
         # )
         e1, e2 = compare_final_energies(
-            path1=(
-                calculation_done / f"{old_cage}{old_cage_suffix}_ensemble.json"
-            ),
+            path1=(calculation_done / f"{old_cage}{old_cage_suffix}_ensemble.json"),
             path2=calculation_output / f"{cage_name}_ensemble.json",
         )
 
@@ -762,9 +731,7 @@ def analysis(
                     search_string=("b1", "a1", "c1", "a1", "b1"),
                     search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
                     measured_atom_ids=[0, 1, 3, 4],
-                    phi0=openmm.unit.Quantity(
-                        value=180, unit=openmm.unit.degrees
-                    ),
+                    phi0=openmm.unit.Quantity(value=180, unit=openmm.unit.degrees),
                     torsion_k=openmm.unit.Quantity(
                         value=50,
                         unit=openmm.unit.kilojoules_per_mole,
@@ -1057,9 +1024,7 @@ def main():
             )
 
             # Optimise building blocks.
-            c2_name = (
-                f"{c2_precursor.get_name()}_f{forcefield.get_identifier()}"
-            )
+            c2_name = f"{c2_precursor.get_name()}_f{forcefield.get_identifier()}"
             c2_building_block = optimise_ligand(
                 molecule=c2_precursor.get_building_block(),
                 name=c2_name,
@@ -1069,9 +1034,7 @@ def main():
             )
             c2_building_block.write(str(ligand_output / f"{c2_name}_optl.mol"))
 
-            cl_name = (
-                f"{cl_precursor.get_name()}_f{forcefield.get_identifier()}"
-            )
+            cl_name = f"{cl_precursor.get_name()}_f{forcefield.get_identifier()}"
             cl_building_block = optimise_ligand(
                 molecule=cl_precursor.get_building_block(),
                 name=cl_name,
@@ -1099,9 +1062,7 @@ def main():
                 database=database,
             )
             if conformer is not None:
-                conformer.molecule.write(
-                    str(struct_output / f"{name}_optc.mol")
-                )
+                conformer.molecule.write(str(struct_output / f"{name}_optc.mol"))
 
             cages.append(name)
 

@@ -13,15 +13,15 @@ import logging
 import sys
 import pathlib
 import shutil
-
+import stko
 import matplotlib.pyplot as plt
 import numpy as np
 import stk
-from cgexplore.forcefields import AssignedSystem, ForceField, angle_between
+from cgexplore.forcefields import AssignedSystem, ForceField
 from cgexplore.molecular import BeadLibrary, CgBead, periodic_table
 from cgexplore.optimisation import CGOMMDynamics, CGOMMOptimizer
 from cgexplore.utilities import check_directory
-from cgexplore.analysis import get_dihedral
+
 from cgexplore.terms import (
     TargetAngle,
     TargetBond,
@@ -78,9 +78,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                 type2="c1",
                 element1="Ag",
                 element2="Ag",
-                bond_r=openmm.unit.Quantity(
-                    value=2.0, unit=openmm.unit.angstrom
-                ),
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
                 bond_k=openmm.unit.Quantity(
                     value=1e5,
                     unit=openmm.unit.kilojoule
@@ -93,9 +91,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                 type2="m1",
                 element1="Ag",
                 element2="Fe",
-                bond_r=openmm.unit.Quantity(
-                    value=2.0, unit=openmm.unit.angstrom
-                ),
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
                 bond_k=openmm.unit.Quantity(
                     value=1e5,
                     unit=openmm.unit.kilojoule
@@ -108,9 +104,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                 type2="n1",
                 element1="Ag",
                 element2="N",
-                bond_r=openmm.unit.Quantity(
-                    value=2.0, unit=openmm.unit.angstrom
-                ),
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
                 bond_k=openmm.unit.Quantity(
                     value=1e5,
                     unit=openmm.unit.kilojoule
@@ -183,9 +177,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     value=10.0,
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
-                sigma=openmm.unit.Quantity(
-                    value=1.0, unit=openmm.unit.angstrom
-                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 force="custom-excl-vol",
             ),
             TargetNonbonded(
@@ -195,9 +187,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     value=10.0,
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
-                sigma=openmm.unit.Quantity(
-                    value=1.0, unit=openmm.unit.angstrom
-                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 force="custom-excl-vol",
             ),
             TargetNonbonded(
@@ -207,9 +197,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     value=10.0,
                     unit=openmm.unit.kilojoules_per_mole,
                 ),
-                sigma=openmm.unit.Quantity(
-                    value=1.0, unit=openmm.unit.angstrom
-                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 force="custom-excl-vol",
             ),
         ),
@@ -294,9 +282,7 @@ def random_test(c_bead, forcefield, calculation_output):
             edata.append(m_pe - z_pe)
             m_posmat = data[timestep][2]
             z_posmat = zero_data[timestep][2]
-            rdata.append(
-                np.sqrt(np.sum((m_posmat - z_posmat) ** 2) / len(m_posmat))
-            )
+            rdata.append(np.sqrt(np.sum((m_posmat - z_posmat) ** 2) / len(m_posmat)))
 
         axs[0].plot(
             xs,
@@ -526,7 +512,7 @@ def test3(c_bead, forcefield, calculation_output):
             posmat = conformer.molecule.get_position_matrix()
             vector1 = posmat[1] - posmat[0]
             vector2 = posmat[2] - posmat[0]
-            angle = np.degrees(angle_between(vector1, vector2))
+            angle = np.degrees(stko.vector_angle(vector1, vector2))
             tdict[temp][timestep] = (meas_temp, pot_energy, angle)
 
     coords = points_in_circum(r=2, n=100)
@@ -556,7 +542,7 @@ def test3(c_bead, forcefield, calculation_output):
         pos_mat = new_bb.get_position_matrix()
         vector1 = pos_mat[1] - pos_mat[0]
         vector2 = pos_mat[2] - pos_mat[0]
-        angle = np.degrees(angle_between(vector1, vector2))
+        angle = np.degrees(stko.vector_angle(vector1, vector2))
         xys.append(
             (
                 angle,
@@ -565,9 +551,7 @@ def test3(c_bead, forcefield, calculation_output):
         )
 
     fig, ax = plt.subplots(figsize=(8, 5))
-    ax.set_title(
-        f"{angle_c} [deg], {angle_k}" " kJ/mol/radian2", fontsize=16.0
-    )
+    ax.set_title(f"{angle_c} [deg], {angle_k}" " kJ/mol/radian2", fontsize=16.0)
 
     x = np.linspace(0, 180, 100)
     ax.plot(
@@ -661,7 +645,7 @@ def test4(c_bead, forcefield, calculation_output):
             meas_temp = float(row["Temperature (K)"])
             pot_energy = float(row["Potential Energy (kJ/mole)"])
             posmat = conformer.molecule.get_position_matrix()
-            torsion = get_dihedral(
+            torsion = stko.calculate_dihedral(
                 pt1=posmat[0],
                 pt2=posmat[1],
                 pt3=posmat[2],
@@ -694,7 +678,7 @@ def test4(c_bead, forcefield, calculation_output):
             )
         )
         pos_mat = new_bb.get_position_matrix()
-        torsion = get_dihedral(
+        torsion = stko.calculate_dihedral(
             pt1=pos_mat[0],
             pt2=pos_mat[1],
             pt3=pos_mat[2],
@@ -885,9 +869,7 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
             stk.Bond(atoms[0], atoms[2], order=1),
             stk.Bond(atoms[0], atoms[3], order=1),
         ),
-        position_matrix=np.array(
-            [[0, 0, 0], [0, 2, 0], [0, -2, 0], [2, 0, 0]]
-        ),
+        position_matrix=np.array([[0, 0, 0], [0, 2, 0], [0, -2, 0], [2, 0, 0]]),
     )
 
     angle_k = 1e2
@@ -957,10 +939,10 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
         pos_mat = new_bb.get_position_matrix()
         vector1 = pos_mat[1] - pos_mat[0]
         vector2 = pos_mat[2] - pos_mat[0]
-        angle1 = np.degrees(angle_between(vector1, vector2))
+        angle1 = np.degrees(stko.vector_angle(vector1, vector2))
         vector1 = pos_mat[1] - pos_mat[0]
         vector2 = pos_mat[3] - pos_mat[0]
-        angle2 = np.degrees(angle_between(vector1, vector2))
+        angle2 = np.degrees(stko.vector_angle(vector1, vector2))
         xys.append(
             (
                 angle1,
@@ -1030,10 +1012,10 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
             posmat = conformer.molecule.get_position_matrix()
             vector1 = posmat[1] - posmat[0]
             vector2 = posmat[2] - posmat[0]
-            angle1 = np.degrees(angle_between(vector1, vector2))
+            angle1 = np.degrees(stko.vector_angle(vector1, vector2))
             vector1 = posmat[1] - posmat[0]
             vector2 = posmat[3] - posmat[0]
-            angle2 = np.degrees(angle_between(vector1, vector2))
+            angle2 = np.degrees(stko.vector_angle(vector1, vector2))
             tdict[temp][timestep] = (
                 meas_temp,
                 pot_energy,
@@ -1159,7 +1141,7 @@ def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
         pos_mat = new_bb.get_position_matrix()
         vector1 = pos_mat[1] - pos_mat[0]
         vector2 = pos_mat[2] - pos_mat[0]
-        angle1 = np.degrees(angle_between(vector1, vector2))
+        angle1 = np.degrees(stko.vector_angle(vector1, vector2))
         xys.append(
             (
                 angle1,
@@ -1219,7 +1201,7 @@ def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
             posmat = conformer.molecule.get_position_matrix()
             vector1 = posmat[1] - posmat[0]
             vector2 = posmat[2] - posmat[0]
-            angle1 = np.degrees(angle_between(vector1, vector2))
+            angle1 = np.degrees(stko.vector_angle(vector1, vector2))
             tdict[temp][timestep] = (meas_temp, pot_energy, angle1)
 
     for temp in tdict:

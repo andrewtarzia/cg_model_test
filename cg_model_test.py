@@ -743,7 +743,8 @@ def analysis(
     plt.close()
 
 
-def main():
+def main() -> None:
+    """Run script."""
     first_line = f"Usage: {__file__}.py path "
     if not len(sys.argv) == 2:
         logging.info(f"{first_line}")

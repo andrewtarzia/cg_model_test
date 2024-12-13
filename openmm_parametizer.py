@@ -17,18 +17,7 @@ import stko
 import matplotlib.pyplot as plt
 import numpy as np
 import stk
-from cgexplore.forcefields import AssignedSystem, ForceField
-from cgexplore.molecular import BeadLibrary, CgBead, periodic_table
-from cgexplore.optimisation import CGOMMDynamics, CGOMMOptimizer
-from cgexplore.utilities import check_directory
-
-from cgexplore.terms import (
-    TargetAngle,
-    TargetBond,
-    TargetCosineAngle,
-    TargetNonbonded,
-    TargetTorsion,
-)
+import cgexplore as cgx
 
 
 from openmm import openmm
@@ -53,6 +42,10 @@ def torsion_function(x, k, theta0, n):
     return k * (1 + np.cos(n * x - theta0))
 
 
+def abs_torsion_function(x, k, theta0, n):
+    return k * (1 + np.cos(n * abs(x) - theta0))
+
+
 def nonbond_function(x, epsilon1, sigma1, epsilon2, sigma2):
     return np.sqrt(epsilon1 * epsilon2) * ((sigma1 + sigma2) / (2 * x)) ** 12
 
@@ -68,12 +61,12 @@ def points_in_circum(r, n=100):
 
 
 def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
-    forcefield = ForceField(
+    forcefield = cgx.forcefields.ForceField(
         identifier=0,
         prefix="omm",
         present_beads=(c_bead, m_bead, n_bead),
         bond_targets=(
-            TargetBond(
+            cgx.terms.TargetBond(
                 type1="c1",
                 type2="c1",
                 element1="Ag",
@@ -86,7 +79,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     / openmm.unit.nanometer**2,
                 ),
             ),
-            TargetBond(
+            cgx.terms.TargetBond(
                 type1="c1",
                 type2="m1",
                 element1="Ag",
@@ -99,7 +92,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     / openmm.unit.nanometer**2,
                 ),
             ),
-            TargetBond(
+            cgx.terms.TargetBond(
                 type1="c1",
                 type2="n1",
                 element1="Ag",
@@ -114,7 +107,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
             ),
         ),
         angle_targets=(
-            TargetAngle(
+            cgx.terms.TargetAngle(
                 type1="c1",
                 type2="c1",
                 type3="c1",
@@ -129,7 +122,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     / openmm.unit.radian**2,
                 ),
             ),
-            TargetCosineAngle(
+            cgx.terms.TargetCosineAngle(
                 type1="c1",
                 type2="m1",
                 type3="c1",
@@ -142,7 +135,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                     value=1e2, unit=openmm.unit.kilojoule / openmm.unit.mole
                 ),
             ),
-            TargetCosineAngle(
+            cgx.terms.TargetCosineAngle(
                 type1="c1",
                 type2="n1",
                 type3="c1",
@@ -157,7 +150,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
             ),
         ),
         torsion_targets=(
-            TargetTorsion(
+            cgx.terms.TargetTorsion(
                 search_string=("c1", "c1", "c1", "c1"),
                 search_estring=("Ag", "Ag", "Ag", "Ag"),
                 measured_atom_ids=[0, 1, 2, 3],
@@ -170,7 +163,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
             ),
         ),
         nonbonded_targets=(
-            TargetNonbonded(
+            cgx.terms.TargetNonbonded(
                 bead_class="c",
                 bead_element="Ag",
                 epsilon=openmm.unit.Quantity(
@@ -180,7 +173,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                 sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 force="custom-excl-vol",
             ),
-            TargetNonbonded(
+            cgx.terms.TargetNonbonded(
                 bead_class="m",
                 bead_element="Fe",
                 epsilon=openmm.unit.Quantity(
@@ -190,7 +183,7 @@ def define_forcefield(c_bead, m_bead, n_bead, calculation_output):
                 sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
                 force="custom-excl-vol",
             ),
-            TargetNonbonded(
+            cgx.terms.TargetNonbonded(
                 bead_class="n",
                 bead_element="N",
                 epsilon=openmm.unit.Quantity(
@@ -238,7 +231,7 @@ def random_test(c_bead, forcefield, calculation_output):
         tdict[run] = {}
 
         logging.info(f"running MD random test; {run}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mdr_{run}",
             output_dir=calculation_output,
             temperature=temperature,
@@ -360,7 +353,7 @@ def test1(c_bead, forcefield, calculation_output):
     for temp in tcol:
         tdict[temp] = {}
         logging.info(f"running MD test1; {temp}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mdl1_{temp}",
             output_dir=calculation_output,
             temperature=temp,
@@ -394,13 +387,13 @@ def test1(c_bead, forcefield, calculation_output):
         new_bb = linear_bb.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_om1",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -488,7 +481,7 @@ def test3(c_bead, forcefield, calculation_output):
     for temp in tcol:
         tdict[temp] = {}
         logging.info(f"running MD test3; {temp}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mdl3_{temp}",
             output_dir=calculation_output,
             temperature=temp,
@@ -524,13 +517,13 @@ def test3(c_bead, forcefield, calculation_output):
         new_bb = linear_bb.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_om3",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -623,7 +616,7 @@ def test4(c_bead, forcefield, calculation_output):
     for temp in tcol:
         tdict[temp] = {}
         logging.info(f"running MD test4; {temp}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mdl4_{temp}",
             output_dir=calculation_output,
             temperature=temp,
@@ -662,13 +655,13 @@ def test4(c_bead, forcefield, calculation_output):
         new_bb = linear_bb.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_om4",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -767,13 +760,13 @@ def test5(c_bead, forcefield, calculation_output):
         new_bb = linear_bb.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_om5",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -837,6 +830,297 @@ def test5(c_bead, forcefield, calculation_output):
     plt.close()
 
 
+def mirrored_torsions_test(c_bead, calculation_output):
+    raise SystemExit("this is something you were working on - a new potential term")
+    target_torsion = 40
+    torsion_k = 50
+    n = 1
+    forcefield = cgx.forcefields.ForceField(
+        identifier=0,
+        prefix="omm",
+        present_beads=(c_bead,),
+        bond_targets=(
+            cgx.term.TargetBond(
+                type1="c1",
+                type2="c1",
+                element1="Ag",
+                element2="Ag",
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
+                bond_k=openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+            cgx.term.TargetBond(
+                type1="c1",
+                type2="m1",
+                element1="Ag",
+                element2="Fe",
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
+                bond_k=openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+            cgx.term.TargetBond(
+                type1="c1",
+                type2="n1",
+                element1="Ag",
+                element2="N",
+                bond_r=openmm.unit.Quantity(value=2.0, unit=openmm.unit.angstrom),
+                bond_k=openmm.unit.Quantity(
+                    value=1e5,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.nanometer**2,
+                ),
+            ),
+        ),
+        angle_targets=(
+            cgx.term.TargetAngle(
+                type1="c1",
+                type2="c1",
+                type3="c1",
+                element1="Ag",
+                element2="Ag",
+                element3="Ag",
+                angle=openmm.unit.Quantity(value=90, unit=openmm.unit.degrees),
+                angle_k=openmm.unit.Quantity(
+                    value=1e2,
+                    unit=openmm.unit.kilojoule
+                    / openmm.unit.mole
+                    / openmm.unit.radian**2,
+                ),
+            ),
+            cgx.term.TargetCosineAngle(
+                type1="c1",
+                type2="m1",
+                type3="c1",
+                element1="Ag",
+                element2="Fe",
+                element3="Ag",
+                n=4,
+                b=1,
+                angle_k=openmm.unit.Quantity(
+                    value=1e2, unit=openmm.unit.kilojoule / openmm.unit.mole
+                ),
+            ),
+            cgx.term.TargetCosineAngle(
+                type1="c1",
+                type2="n1",
+                type3="c1",
+                element1="Ag",
+                element2="N",
+                element3="Ag",
+                n=3,
+                b=-1,
+                angle_k=openmm.unit.Quantity(
+                    value=1e2, unit=openmm.unit.kilojoule / openmm.unit.mole
+                ),
+            ),
+        ),
+        torsion_targets=(
+            cgx.term.TargetTorsion(
+                search_string=("c1", "c1", "c1", "c1"),
+                search_estring=("Ag", "Ag", "Ag", "Ag"),
+                measured_atom_ids=[0, 1, 2, 3],
+                phi0=openmm.unit.Quantity(
+                    value=180 - target_torsion,
+                    unit=openmm.unit.degrees,
+                ),
+                torsion_k=openmm.unit.Quantity(
+                    value=50,
+                    unit=openmm.unit.kilojoules_per_mole,
+                ),
+                torsion_n=n,
+            ),
+        ),
+        nonbonded_targets=(
+            cgx.term.TargetNonbonded(
+                bead_class="c",
+                bead_element="Ag",
+                epsilon=openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoules_per_mole,
+                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+                force="custom-excl-vol",
+            ),
+            cgx.term.TargetNonbonded(
+                bead_class="m",
+                bead_element="Fe",
+                epsilon=openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoules_per_mole,
+                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+                force="custom-excl-vol",
+            ),
+            cgx.term.TargetNonbonded(
+                bead_class="n",
+                bead_element="N",
+                epsilon=openmm.unit.Quantity(
+                    value=10.0,
+                    unit=openmm.unit.kilojoules_per_mole,
+                ),
+                sigma=openmm.unit.Quantity(value=1.0, unit=openmm.unit.angstrom),
+                force="custom-excl-vol",
+            ),
+        ),
+        vdw_bond_cutoff=2,
+    )
+    linear_bb = stk.BuildingBlock(
+        smiles=(
+            f"[{c_bead.element_string}][{c_bead.element_string}]"
+            f"[{c_bead.element_string}][{c_bead.element_string}]"
+        ),
+        position_matrix=[[0, 2, 0], [0, 0, 0], [2, 0, 0], [2, 2, 0]],
+    )
+
+    tcol = {700: "k", 300: "gold", 100: "orange", 10: "green"}
+
+    assigned_system = forcefield.assign_terms(
+        molecule=linear_bb,
+        name="t6",
+        output_dir=calculation_output,
+    )
+
+    tdict = {}
+    for temp in tcol:
+        break
+        tdict[temp] = {}
+        logging.info(f"running MD test6; {temp}")
+        opt = cgx.optimisation.CGOMMDynamics(
+            fileprefix=f"mdl6_{temp}",
+            output_dir=calculation_output,
+            temperature=temp,
+            random_seed=1000,
+            num_steps=10000,
+            time_step=1 * openmm.unit.femtoseconds,
+            friction=1.0 / openmm.unit.picosecond,
+            reporting_freq=100,
+            traj_freq=100,
+            platform=None,
+        )
+
+        trajectory = opt.run_dynamics(assigned_system)
+
+        traj_log = trajectory.get_data()
+        for conformer in trajectory.yield_conformers():
+            timestep = conformer.timestep
+            row = traj_log[traj_log['#"Step"'] == timestep].iloc[0]
+            meas_temp = float(row["Temperature (K)"])
+            pot_energy = float(row["Potential Energy (kJ/mole)"])
+            posmat = conformer.molecule.get_position_matrix()
+            torsion = stko.calculate_dihedral(
+                pt1=posmat[0],
+                pt2=posmat[1],
+                pt3=posmat[2],
+                pt4=posmat[3],
+            )
+            tdict[temp][timestep] = (meas_temp, pot_energy, torsion)
+
+    coords = points_in_circum(r=2, n=10)
+    xys = []
+    for i, coord in enumerate(coords):
+        name = f"l6_{i}"
+        new_posmat = linear_bb.get_position_matrix()
+        new_posmat[3] = np.array([2, coord[0], coord[1]])
+        new_bb = linear_bb.with_position_matrix(new_posmat)
+        new_bb.write(str(calculation_output / f"{name}.mol"))
+        logging.info(f"evaluating {name}")
+        opt = cgx.optimisation.CGOMMOptimizer(
+            fileprefix=f"{name}_om4",
+            output_dir=calculation_output,
+            platform=None,
+        )
+        energy = opt.calculate_energy(
+            cgx.forcefields.AssignedSystem(
+                molecule=new_bb,
+                forcefield_terms=assigned_system.forcefield_terms,
+                system_xml=assigned_system.system_xml,
+                topology_xml=assigned_system.topology_xml,
+                bead_set=assigned_system.bead_set,
+                vdw_bond_cutoff=assigned_system.vdw_bond_cutoff,
+            )
+        )
+        pos_mat = new_bb.get_position_matrix()
+        torsion = stko.calculate_dihedral(
+            pt1=pos_mat[0],
+            pt2=pos_mat[1],
+            pt3=pos_mat[2],
+            pt4=pos_mat[3],
+        )
+        xys.append(
+            (
+                torsion,
+                energy.value_in_unit(openmm.unit.kilojoules_per_mole),
+            )
+        )
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.set_title(
+        f"n: {n}, k={torsion_k} [kJ/mol], target={target_torsion} [deg]",
+        fontsize=16.0,
+    )
+
+    torsions = [i[0] for i in xys]
+    x = np.linspace(min(torsions), max(torsions), 100)
+    ax.plot(
+        x,
+        abs_torsion_function(
+            np.radians(x), torsion_k, np.radians(180 + target_torsion), n
+        ),
+        c="r",
+        lw=2,
+        label="analytical",
+    )
+
+    ax.scatter(
+        [i[0] for i in xys],
+        [i[1] for i in xys],
+        c="skyblue",
+        s=120,
+        edgecolor="k",
+        alpha=1.0,
+        label="numerical",
+    )
+    ax.axhline(y=0.0, c="k", lw=2, linestyle="--")
+    ax.axvline(x=0.0, c="k", lw=2)
+
+    for temp in tdict:
+        data = tdict[temp]
+        ax.scatter(
+            [data[i][2] for i in data],
+            [data[i][1] for i in data],
+            c=tcol[temp],
+            s=30,
+            edgecolor="none",
+            alpha=1.0,
+            label=f"{temp} K",
+        )
+
+    ax.axvline(x=target_torsion, c="gold", ls="--")
+    ax.axvline(x=-target_torsion, c="gold", ls="--")
+
+    ax.tick_params(axis="both", which="major", labelsize=16)
+    ax.set_xlabel("torsion [theta]", fontsize=16)
+    ax.set_ylabel("energy [kJmol-1]", fontsize=16)
+    ax.legend(fontsize=16)
+    fig.tight_layout()
+    fig.savefig(
+        "l6.png",
+        dpi=720,
+        bbox_inches="tight",
+    )
+    plt.close()
+    raise SystemExit
+
+
 def uff_function(angles, k, n, b):
     # Implement the Lammps form: https://docs.lammps.org/angle_cosine_periodic.html
     C = n**2 * k / 2
@@ -855,7 +1139,7 @@ def uff_gen_function(angles, k, theta0):
 
 
 def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
-    pt = periodic_table()
+    pt = cgx.molecular.periodic_table()
     atoms = (
         stk.Atom(0, pt[m_bead.element_string]),
         stk.Atom(1, pt[c_bead.element_string]),
@@ -921,13 +1205,13 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
         new_bb = oct_complex.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_omuff",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -988,7 +1272,7 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
     for temp in tcol:
         tdict[temp] = {}
         logging.info(f"running MD ufftest; {temp}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mduff_{temp}",
             output_dir=calculation_output,
             temperature=temp,
@@ -1059,7 +1343,7 @@ def uff_angle_test1(c_bead, m_bead, forcefield, calculation_output):
 
 
 def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
-    pt = periodic_table()
+    pt = cgx.molecular.periodic_table()
     atoms = (
         stk.Atom(0, pt[n_bead.element_string]),
         stk.Atom(1, pt[c_bead.element_string]),
@@ -1123,13 +1407,13 @@ def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
         new_bb = tri_complex.with_position_matrix(new_posmat)
         new_bb.write(str(calculation_output / f"{name}.mol"))
         logging.info(f"evaluating {name}")
-        opt = CGOMMOptimizer(
+        opt = cgx.optimisation.CGOMMOptimizer(
             fileprefix=f"{name}_omuff2",
             output_dir=calculation_output,
             platform=None,
         )
         energy = opt.calculate_energy(
-            AssignedSystem(
+            cgx.forcefields.AssignedSystem(
                 molecule=new_bb,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -1177,7 +1461,7 @@ def uff_angle_test2(c_bead, n_bead, forcefield, calculation_output):
     for temp in tcol:
         tdict[temp] = {}
         logging.info(f"running MD ufftest; {temp}")
-        opt = CGOMMDynamics(
+        opt = cgx.optimisation.CGOMMDynamics(
             fileprefix=f"mduff2_{temp}",
             output_dir=calculation_output,
             temperature=temp,
@@ -1239,31 +1523,31 @@ def main() -> None:
         path = sys.argv[1]
 
     struct_output = pathlib.Path().absolute() / path / "ommtest"
-    check_directory(struct_output)
+    cgx.utilities.check_directory(struct_output)
     calculation_output = pathlib.Path().absolute() / path / "ommcalculations"
-    check_directory(calculation_output)
+    cgx.utilities.check_directory(calculation_output)
 
     # Define bead libraries.
-    c_bead = CgBead(
+    c_bead = cgx.molecular.CgBead(
         element_string="Ag",
         bead_class="c",
         bead_type="c1",
         coordination=2,
     )
-    m_bead = CgBead(
+    m_bead = cgx.molecular.CgBead(
         element_string="Fe",
         bead_class="m",
         bead_type="m1",
         coordination=3,
     )
-    n_bead = CgBead(
+    n_bead = cgx.molecular.CgBead(
         element_string="N",
         bead_class="n",
         bead_type="n1",
         coordination=3,
     )
 
-    _ = BeadLibrary((c_bead, m_bead, n_bead))
+    _ = cgx.terms.BeadLibrary((c_bead, m_bead, n_bead))
     forcefield = define_forcefield(c_bead, m_bead, n_bead, calculation_output)
 
     uff_angle_test1(c_bead, m_bead, forcefield, calculation_output)
@@ -1276,6 +1560,7 @@ def main() -> None:
 
     shutil.rmtree(struct_output)
     shutil.rmtree(calculation_output)
+    mirrored_torsions_test(c_bead, calculation_output)
 
 
 if __name__ == "__main__":

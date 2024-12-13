@@ -21,29 +21,7 @@ from rdkit import RDLogger
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
-
-from cgexplore.terms import (
-    TargetBondRange,
-    TargetAngleRange,
-    TargetTorsionRange,
-    PyramidAngleRange,
-    TargetTorsion,
-    TargetNonbondedRange,
-)
-from cgexplore.forcefields import AssignedSystem, ForceFieldLibrary
-from cgexplore.utilities import (
-    AtomliteDatabase,
-    run_constrained_optimisation,
-    run_optimisation,
-    run_soft_md_cycle,
-    yield_shifted_models,
-    optimise_ligand,
-    check_directory,
-)
-from cgexplore.molecular import Ensemble, Conformer
-from cgexplore.analysis import GeomMeasure
-from cgexplore.molecular import ThreeC1Arm, TwoC1Arm, FourC1Arm, CgBead
-
+import cgexplore as cgx
 
 logging.basicConfig(
     level=logging.INFO,
@@ -65,7 +43,7 @@ def optimise_cage(
     if database.has_molecule(key=name):
         final_molecule = database.get_molecule(key=name)
         final_molecule.write(fina_mol_file)
-        return Conformer(
+        return cgx.molecular.Conformer(
             molecule=final_molecule,
             energy_decomposition=database.get_property(
                 key=name,
@@ -76,7 +54,7 @@ def optimise_cage(
 
     # Do not rerun if final mol exists.
     if os.path.exists(fina_mol_file):
-        ensemble = Ensemble(
+        ensemble = cgx.molecular.Ensemble(
             base_molecule=molecule,
             base_mol_path=os.path.join(output_dir, f"{name}_base.mol"),
             conformer_xyz=os.path.join(output_dir, f"{name}_ensemble.xyz"),
@@ -97,14 +75,14 @@ def optimise_cage(
 
     assigned_system = forcefield.assign_terms(molecule, name, output_dir)
 
-    ensemble = Ensemble(
+    ensemble = cgx.molecular.Ensemble(
         base_molecule=molecule,
         base_mol_path=os.path.join(output_dir, f"{name}_base.mol"),
         conformer_xyz=os.path.join(output_dir, f"{name}_ensemble.xyz"),
         data_json=os.path.join(output_dir, f"{name}_ensemble.json"),
         overwrite=True,
     )
-    temp_molecule = run_constrained_optimisation(
+    temp_molecule = cgx.utilities.run_constrained_optimisation(
         assigned_system=assigned_system,
         name=name,
         output_dir=output_dir,
@@ -115,8 +93,8 @@ def optimise_cage(
     )
 
     logging.info(f"optimisation of {name}")
-    conformer = run_optimisation(
-        assigned_system=AssignedSystem(
+    conformer = cgx.utilities.run_optimisation(
+        assigned_system=cgx.forcefields.AssignedSystem(
             molecule=temp_molecule,
             forcefield_terms=assigned_system.forcefield_terms,
             system_xml=assigned_system.system_xml,
@@ -135,11 +113,11 @@ def optimise_cage(
     # Run optimisations of series of conformers with shifted out
     # building blocks.
     logging.info(f"optimisation of shifted structures of {name}")
-    for test_molecule in yield_shifted_models(
+    for test_molecule in cgx.utilities.yield_shifted_models(
         temp_molecule, forcefield, kicks=(1, 2, 3, 4)
     ):
-        conformer = run_optimisation(
-            assigned_system=AssignedSystem(
+        conformer = cgx.utilities.run_optimisation(
+            assigned_system=cgx.forcefields.AssignedSystem(
                 molecule=test_molecule,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -158,9 +136,9 @@ def optimise_cage(
     logging.info(f"soft MD run of {name}")
     num_steps = 20000
     traj_freq = 500
-    soft_md_trajectory = run_soft_md_cycle(
+    soft_md_trajectory = cgx.utilities.run_soft_md_cycle(
         name=name,
-        assigned_system=AssignedSystem(
+        assigned_system=cgx.forcefields.AssignedSystem(
             molecule=ensemble.get_lowest_e_conformer().molecule,
             forcefield_terms=assigned_system.forcefield_terms,
             system_xml=assigned_system.system_xml,
@@ -196,8 +174,8 @@ def optimise_cage(
     # Go through each conformer from soft MD.
     # Optimise them all.
     for md_conformer in soft_md_trajectory.yield_conformers():
-        conformer = run_optimisation(
-            assigned_system=AssignedSystem(
+        conformer = cgx.utilities.run_optimisation(
+            assigned_system=cgx.forcefields.AssignedSystem(
                 molecule=md_conformer.molecule,
                 forcefield_terms=assigned_system.forcefield_terms,
                 system_xml=assigned_system.system_xml,
@@ -274,7 +252,7 @@ def compare_final_energies(path1, path2):
 
 
 def define_forcefield_library(present_beads, prefix):
-    forcefieldlibrary = ForceFieldLibrary(
+    forcefieldlibrary = cgx.forcefields.ForceFieldLibrary(
         present_beads=present_beads,
         vdw_bond_cutoff=2,
         prefix=prefix,
@@ -306,7 +284,7 @@ def define_forcefield_library(present_beads, prefix):
             for k in bond[5]
         )
         forcefieldlibrary.add_bond_range(
-            TargetBondRange(
+            cgx.terms.TargetBondRange(
                 type1=bond[0],
                 type2=bond[1],
                 element1=bond[2],
@@ -343,7 +321,7 @@ def define_forcefield_library(present_beads, prefix):
             for k in angle[7]
         )
         forcefieldlibrary.add_angle_range(
-            TargetAngleRange(
+            cgx.terms.TargetAngleRange(
                 type1=angle[0],
                 type2=angle[1],
                 type3=angle[2],
@@ -366,7 +344,7 @@ def define_forcefield_library(present_beads, prefix):
             for k in pyramid[7]
         )
         forcefieldlibrary.add_angle_range(
-            PyramidAngleRange(
+            cgx.terms.PyramidAngleRange(
                 type1=pyramid[0],
                 type2=pyramid[1],
                 type3=pyramid[2],
@@ -379,7 +357,7 @@ def define_forcefield_library(present_beads, prefix):
         )
 
     forcefieldlibrary.add_torsion_range(
-        TargetTorsionRange(
+        cgx.terms.TargetTorsionRange(
             search_string=("b1", "a1", "c1", "a1", "b1"),
             search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
             measured_atom_ids=[0, 1, 3, 4],
@@ -415,7 +393,7 @@ def define_forcefield_library(present_beads, prefix):
 
     for nb in nonbondeds:
         forcefieldlibrary.add_nonbonded_range(
-            TargetNonbondedRange(
+            cgx.terms.TargetNonbondedRange(
                 bead_class=nb[0],
                 bead_element=nb[1],
                 epsilons=(
@@ -557,9 +535,9 @@ def analysis(
         assert new_struct.get_num_atoms() == old_struct.get_num_atoms()
         assert new_struct.get_num_bonds() == old_struct.get_num_bonds()
 
-        g_measure = GeomMeasure(
+        g_measure = cgx.analysis.GeomMeasure(
             target_torsions=(
-                TargetTorsion(
+                cgx.terms.TargetTorsion(
                     search_string=("b1", "a1", "c1", "a1", "b1"),
                     search_estring=("Pb", "Ba", "Ag", "Ba", "Pb"),
                     measured_atom_ids=[0, 1, 3, 4],
@@ -755,41 +733,41 @@ def main() -> None:
     prefix = "cg_model_test"
 
     struct_output = pathlib.Path().absolute() / path / "structures"
-    check_directory(struct_output)
+    cgx.utilities.check_directory(struct_output)
     calculation_output = pathlib.Path().absolute() / path / "calculations"
-    check_directory(calculation_output)
+    cgx.utilities.check_directory(calculation_output)
     ligand_output = pathlib.Path().absolute() / path / "ligands"
-    check_directory(ligand_output)
+    cgx.utilities.check_directory(ligand_output)
 
     struct_done = pathlib.Path().absolute() / path / "old_structures"
     calculation_done = pathlib.Path().absolute() / path / "old_calculations"
 
     # Define bead libraries.
-    core_bead = CgBead(
+    core_bead = cgx.molecular.CgBead(
         element_string="Ag",
         bead_class="c",
         bead_type="c1",
         coordination=2,
     )
-    arm_bead = CgBead(
+    arm_bead = cgx.molecular.CgBead(
         element_string="Ba",
         bead_class="a",
         bead_type="a1",
         coordination=2,
     )
-    binder_bead = CgBead(
+    binder_bead = cgx.molecular.CgBead(
         element_string="Pb",
         bead_class="b",
         bead_type="b1",
         coordination=2,
     )
-    trigonal_bead = CgBead(
+    trigonal_bead = cgx.molecular.CgBead(
         element_string="C",
         bead_class="n",
         bead_type="n1",
         coordination=3,
     )
-    tetragonal_bead = CgBead(
+    tetragonal_bead = cgx.molecular.CgBead(
         element_string="Pd",
         bead_class="m",
         bead_type="m1",
@@ -814,9 +792,9 @@ def main() -> None:
     )
 
     logging.info("defining building blocks")
-    ditopic = TwoC1Arm(bead=core_bead, abead1=arm_bead)
-    tritopic = ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
-    tetratopic = FourC1Arm(bead=tetragonal_bead, abead1=binder_bead)
+    ditopic = cgx.molecular.TwoC1Arm(bead=core_bead, abead1=arm_bead)
+    tritopic = cgx.molecular.ThreeC1Arm(bead=trigonal_bead, abead1=binder_bead)
+    tetratopic = cgx.molecular.FourC1Arm(bead=tetragonal_bead, abead1=binder_bead)
 
     # Define list of topology functions.
     cage_2p3_topologies = {"4P6": stk.cage.FourPlusSix}
@@ -837,7 +815,9 @@ def main() -> None:
         },
     }
 
-    database = AtomliteDatabase(db_file=struct_output / "cg_model_test.db")
+    database = cgx.utilities.AtomliteDatabase(
+        db_file=struct_output / "cg_model_test.db"
+    )
 
     cages = []
     for population in populations:
@@ -858,7 +838,7 @@ def main() -> None:
 
             # Optimise building blocks.
             c2_name = f"{c2_precursor.get_name()}_f{forcefield.get_identifier()}"
-            c2_building_block = optimise_ligand(
+            c2_building_block = cgx.utilities.optimise_ligand(
                 molecule=c2_precursor.get_building_block(),
                 name=c2_name,
                 output_dir=calculation_output,
@@ -868,7 +848,7 @@ def main() -> None:
             c2_building_block.write(str(ligand_output / f"{c2_name}_optl.mol"))
 
             cl_name = f"{cl_precursor.get_name()}_f{forcefield.get_identifier()}"
-            cl_building_block = optimise_ligand(
+            cl_building_block = cgx.utilities.optimise_ligand(
                 molecule=cl_precursor.get_building_block(),
                 name=cl_name,
                 output_dir=calculation_output,

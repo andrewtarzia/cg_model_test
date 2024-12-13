@@ -1547,7 +1547,7 @@ def main() -> None:
         coordination=3,
     )
 
-    _ = cgx.terms.BeadLibrary((c_bead, m_bead, n_bead))
+    _ = cgx.molecular.BeadLibrary((c_bead, m_bead, n_bead))
     forcefield = define_forcefield(c_bead, m_bead, n_bead, calculation_output)
 
     uff_angle_test1(c_bead, m_bead, forcefield, calculation_output)

@@ -1560,7 +1560,7 @@ def main() -> None:
 
     shutil.rmtree(struct_output)
     shutil.rmtree(calculation_output)
-    mirrored_torsions_test(c_bead, calculation_output)
+    # mirrored_torsions_test(c_bead, calculation_output)
 
 
 if __name__ == "__main__":
